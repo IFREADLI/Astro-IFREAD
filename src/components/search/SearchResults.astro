@@ -130,6 +130,11 @@ const { results, query, totalPosts } = Astro.props;
 <style>
   .search-results {
     container-type: inline-size;
+    transition: all 0.3s ease;
+  }
+
+  .search-results article {
+    transition: all 0.3s ease;
   }
 
   .search-suggestion-item {
@@ -150,7 +155,7 @@ const { results, query, totalPosts } = Astro.props;
 
   /* 响应式调整 */
   @container (max-width: 640px) {
-    .search-result-card {
+    .search-results article {
       padding: 1rem;
     }
   }

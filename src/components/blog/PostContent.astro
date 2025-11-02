@@ -3,7 +3,6 @@ import { getCollection } from 'astro:content';
 import { formatReadingTime } from '../../utils/content';
 import { formatDate } from '../../utils/content';
 import { processMedia } from '../../utils/media';
-import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import OptimizedImage from '../media/OptimizedImage.astro';
 import CodeBlock from '../media/CodeBlock.astro';
@@ -241,7 +240,6 @@ const formattedReadingTime = formatReadingTime(readingTime);
 </script>
 
 <style>
-  /* 文章内容排版优化 */
   .prose {
     font-size: 1.125rem;
     line-height: 1.75;
@@ -321,7 +319,6 @@ const formattedReadingTime = formatReadingTime(readingTime);
     }
   }
 
-  /* 响应式调整 */
   @media (max-width: 768px) {
     .prose {
       font-size: 1rem;
@@ -340,24 +337,21 @@ const formattedReadingTime = formatReadingTime(readingTime);
     }
   }
 
-  /* 分享按钮悬停效果 */
   .flex.space-x-4 a:hover,
   .flex.space-x-4 button:hover {
     transform: translateY(-2px);
+    transition: transform 0.2s ease;
   }
 
-  /* 导航链接样式 */
   nav a {
     transition: all 0.2s ease;
   }
 
-  /* 代码块样式 */
   .prose pre {
     border-radius: 0.5rem;
     overflow-x: auto;
   }
 
-  /* 表格样式 */
   .prose table {
     width: 100%;
     margin-top: 0;

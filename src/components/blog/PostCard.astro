@@ -120,6 +120,7 @@ const formattedReadingTime = formatReadingTime(readingTime);
   /* 文章卡片悬停效果 */
   .group:hover {
     transform: translateY(-2px);
+    transition: transform 0.2s ease;
   }
 
   /* 图片悬停缩放效果 */
@@ -132,7 +133,6 @@ const formattedReadingTime = formatReadingTime(readingTime);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    line-clamp: 2;
     overflow: hidden;
   }
 
@@ -141,7 +141,6 @@ const formattedReadingTime = formatReadingTime(readingTime);
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
-    line-clamp: 3;
     overflow: hidden;
   }
 

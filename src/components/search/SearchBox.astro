@@ -37,18 +37,15 @@ const {
 </div>
 
 <script>
-  // 搜索建议功能
   document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    const searchInput = document.getElementById('search-input');
     const suggestionsContainer = document.getElementById('search-suggestions');
     let currentFocus = -1;
     
-    // 获取搜索建议
-    async function getSuggestions(query: string): Promise<string[]> {
+    async function getSuggestions(query) {
       if (!query.trim()) return [];
       
       try {
-        // 调用API获取搜索建议
         const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}&limit=5`);
         if (!response.ok) {
           throw new Error('Failed to fetch suggestions');
@@ -62,11 +59,9 @@ const {
       }
     }
     
-    // 显示搜索建议
-    function showSuggestions(suggestions: string[]) {
+    function showSuggestions(suggestions) {
       if (!suggestionsContainer) return;
       
-      // 清空现有建议
       suggestionsContainer.innerHTML = '';
       currentFocus = -1;
       
@@ -75,7 +70,6 @@ const {
         return;
       }
       
-      // 创建建议项
       suggestions.forEach((suggestion, index) => {
         const item = document.createElement('div');
         item.className = 'search-suggestion-item px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700';
@@ -85,7 +79,6 @@ const {
           submitSearch();
         });
         
-        // 键盘导航
         item.addEventListener('mouseenter', () => {
           currentFocus = index;
           updateActiveSuggestion();
@@ -97,37 +90,30 @@ const {
       suggestionsContainer.classList.remove('hidden');
     }
     
-    // 更新当前激活的建议项
     function updateActiveSuggestion() {
-      const items = suggestionsContainer?.getElementsByClassName('search-suggestion-item');
+      if (!suggestionsContainer) return;
+      const items = suggestionsContainer.getElementsByClassName('search-suggestion-item');
       if (!items) return;
       
-      // 移除所有激活状态
       Array.from(items).forEach(item => {
         item.classList.remove('bg-gray-100', 'dark:bg-gray-700');
       });
       
-      // 添加当前激活状态
       if (currentFocus >= 0 && currentFocus < items.length) {
         items[currentFocus].classList.add('bg-gray-100', 'dark:bg-gray-700');
       }
     }
     
-    // 提交搜索
     function submitSearch() {
       const query = searchInput.value.trim();
       if (query) {
-        // 构建搜索URL
         const url = new URL(window.location.href);
         url.pathname = '/search';
         url.searchParams.set('q', query);
-        
-        // 跳转到搜索页面
         window.location.href = url.toString();
       }
     }
     
-    // 输入事件处理
     searchInput.addEventListener('input', async () => {
       const query = searchInput.value.trim();
       
@@ -140,9 +126,9 @@ const {
       showSuggestions(suggestions);
     });
     
-    // 键盘事件处理
     searchInput.addEventListener('keydown', (e) => {
-      const items = suggestionsContainer?.getElementsByClassName('search-suggestion-item');
+      if (!suggestionsContainer) return;
+      const items = suggestionsContainer.getElementsByClassName('search-suggestion-item');
       if (!items) return;
       
       if (e.key === 'ArrowDown') {
@@ -158,21 +144,17 @@ const {
       } else if (e.key === 'Enter') {
         e.preventDefault();
         if (currentFocus > -1 && items[currentFocus]) {
-          // 选择当前高亮的建议
-          (items[currentFocus] as HTMLElement).click();
+          items[currentFocus].click();
         } else {
-          // 执行搜索
           submitSearch();
         }
       } else if (e.key === 'Escape') {
-        // 隐藏建议
         showSuggestions([]);
       }
     });
     
-    // 点击外部隐藏建议
     document.addEventListener('click', (e) => {
-      if (!searchInput.contains(e.target as Node) && !suggestionsContainer.contains(e.target as Node)) {
+      if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
         showSuggestions([]);
       }
     });
@@ -185,42 +167,32 @@ const {
     width: 100%;
     max-width: 500px;
   }
-
   .search-input {
     transition: all 0.3s ease;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
-
   .search-input:focus {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
   }
-
   .search-suggestions {
     max-height: 300px;
     overflow-y: auto;
     z-index: 1000;
   }
-
   .search-suggestion-item {
     transition: background-color 0.2s ease;
   }
-
   .search-suggestion-item:hover,
   .search-suggestion-item:focus {
     background-color: #f3f4f6;
   }
-
-  /* 深色模式适配 */
   :global(.dark) .search-input:focus {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
   }
-
   :global(.dark) .search-suggestion-item:hover,
   :global(.dark) .search-suggestion-item:focus {
     background-color: #374151;
   }
-
-  /* 响应式设计 */
   @media (max-width: 640px) {
     .search-box {
       max-width: 100%;
