@@ -3,6 +3,7 @@ title: '现代前端开发最佳实践'
 pubDate: 2023-01-15
 description: '探讨现代前端开发中的最佳实践，包括代码组织、性能优化和团队协作等方面。'
 author: 'lijnf'
+category: 'frontend'
 image:
   url: 'https://picsum.photos/seed/frontend-practices/800/400.jpg'
   alt: '现代前端开发最佳实践'

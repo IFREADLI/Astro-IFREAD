@@ -7,10 +7,10 @@ import SearchBox from '../components/search/SearchBox.astro';
 import SearchResults from '../components/search/SearchResults.astro';
 import SearchFilters from '../components/search/SearchFilters.astro';
 
-// 获取所有文章
+// Get all posts
 const allPosts = await getCollection('blog');
 
-// 获取搜索参数
+// Get search parameters
 const url = new URL(Astro.request.url);
 const query = url.searchParams.get('q') || '';
 const category = url.searchParams.get('category') || '';
@@ -18,25 +18,24 @@ const tagsParam = url.searchParams.get('tags') || '';
 const sortBy = (url.searchParams.get('sort') as 'relevance' | 'date' | 'title') || 'relevance';
 const sortOrder = (url.searchParams.get('order') as 'asc' | 'desc') || 'desc';
 
-// 解析标签
+// Parse tags
 const tags = tagsParam ? tagsParam.split(',').filter(tag => tag.trim()) : [];
 
-// 执行搜索
+// Execute search
 const searchResults = query 
   ? await searchPosts(allPosts, { query, category, tags, sortBy, sortOrder })
   : [];
 
-// 获取所有可用的分类和标签
+// Get all available categories and tags
 const categories = [...new Set(allPosts.map(post => post.data.category).filter(Boolean))];
 const allTags = [...new Set(allPosts.flatMap(post => post.data.tags || []))];
 ---
 
-<Layout title={`搜索${query ? `: ${query}` : ''}`} description="搜索博客文章">
+<Layout title={`Search${query ? `: ${query}` : ''}`} description="Search blog posts">
   <main class="container mx-auto px-4 py-8 max-w-5xl">
-    <h1 class="text-3xl font-bold mb-8 text-center">搜索文章</h1>
+    <h1 class="text-3xl font-bold mb-8 text-center">Search Posts</h1>
     
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      <!-- 搜索框和过滤器 -->
       <div class="lg:col-span-1">
         <div class="sticky top-8 space-y-6">
           <SearchBox initialQuery={query} />
@@ -52,7 +51,6 @@ const allTags = [...new Set(allPosts.flatMap(post => post.data.tags || []))];
         </div>
       </div>
       
-      <!-- 搜索结果 -->
       <div class="lg:col-span-3">
         <SearchResults 
           results={searchResults}
@@ -63,20 +61,3 @@ const allTags = [...new Set(allPosts.flatMap(post => post.data.tags || []))];
     </div>
   </main>
 </Layout>
-
-<style>
-  /* 搜索结果高亮样式 */
-  mark {
-    background-color: var(--accent);
-    color: var(--accent-contrast);
-    padding: 0 2px;
-    border-radius: 2px;
-  }
-  
-  /* 响应式调整 */
-  @media (max-width: 768px) {
-    .container {
-      padding: 1rem;
-    }
-  }
-</style>
