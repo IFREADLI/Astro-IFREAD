@@ -1,0 +1,475 @@
+---
+// 性能和可访问性监控仪表板
+// 显示网站性能指标和可访问性状态
+---
+
+<div id="performance-dashboard" class="fixed bottom-4 left-4 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 w-80 hidden">
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">性能与可访问性</h3>
+    <button id="close-dashboard" class="p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="关闭仪表板">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+      </svg>
+    </button>
+  </div>
+  
+  <!-- 性能指标 -->
+  <div class="mb-4">
+    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">性能指标</h4>
+    <div class="space-y-2">
+      <div class="flex justify-between items-center">
+        <span class="text-sm text-gray-600 dark:text-gray-400">首次内容绘制 (FCP)</span>
+        <span id="fcp-value" class="text-sm font-medium">-</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-sm text-gray-600 dark:text-gray-400">最大内容绘制 (LCP)</span>
+        <span id="lcp-value" class="text-sm font-medium">-</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-sm text-gray-600 dark:text-gray-400">首次输入延迟 (FID)</span>
+        <span id="fid-value" class="text-sm font-medium">-</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-sm text-gray-600 dark:text-gray-400">累积布局偏移 (CLS)</span>
+        <span id="cls-value" class="text-sm font-medium">-</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-sm text-gray-600 dark:text-gray-400">首次字节时间 (TTFB)</span>
+        <span id="ttfb-value" class="text-sm font-medium">-</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 性能评分 -->
+  <div class="mb-4">
+    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">性能评分</h4>
+    <div class="flex justify-center">
+      <div class="relative inline-flex items-center justify-center">
+        <svg class="w-24 h-24">
+          <circle cx="48" cy="48" r="36" stroke="currentColor" stroke-width="8" fill="none" class="text-gray-200 dark:text-gray-700"></circle>
+          <circle id="performance-score-circle" cx="48" cy="48" r="36" stroke="currentColor" stroke-width="8" fill="none" 
+                  stroke-dasharray="226" stroke-dashoffset="226" 
+                  class="text-blue-500 transition-all duration-500" 
+                  transform="rotate(-90 48 48)"></circle>
+        </svg>
+        <div class="absolute">
+          <span id="performance-score" class="text-2xl font-bold text-gray-900 dark:text-white">-</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 可访问性状态 -->
+  <div class="mb-4">
+    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">可访问性状态</h4>
+    <div class="space-y-2">
+      <div class="flex items-center">
+        <div id="accessibility-status" class="w-3 h-3 rounded-full mr-2"></div>
+        <span id="accessibility-status-text" class="text-sm text-gray-600 dark:text-gray-400">检查中...</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-sm text-gray-600 dark:text-gray-400">对比度</span>
+        <span id="contrast-status" class="text-sm font-medium">-</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-sm text-gray-600 dark:text-gray-400">键盘导航</span>
+        <span id="keyboard-status" class="text-sm font-medium">-</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-sm text-gray-600 dark:text-gray-400">屏幕阅读器</span>
+        <span id="screenreader-status" class="text-sm font-medium">-</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 操作按钮 -->
+  <div class="flex space-x-2">
+    <button id="refresh-metrics" class="flex-1 py-2 px-3 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors">
+      刷新指标
+    </button>
+    <button id="run-accessibility-test" class="flex-1 py-2 px-3 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors">
+      运行测试
+    </button>
+  </div>
+</div>
+
+<!-- 仪表板触发按钮 -->
+<button id="dashboard-trigger" class="fixed bottom-4 left-4 p-3 bg-gray-600 text-white rounded-full shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 z-40" aria-label="打开性能仪表板">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+  </svg>
+</button>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 获取DOM元素
+    const dashboard = document.getElementById('performance-dashboard');
+    const dashboardTrigger = document.getElementById('dashboard-trigger');
+    const closeDashboard = document.getElementById('close-dashboard');
+    const refreshMetrics = document.getElementById('refresh-metrics');
+    const runAccessibilityTest = document.getElementById('run-accessibility-test');
+    
+    // 性能指标元素
+    const fcpValue = document.getElementById('fcp-value');
+    const lcpValue = document.getElementById('lcp-value');
+    const fidValue = document.getElementById('fid-value');
+    const clsValue = document.getElementById('cls-value');
+    const ttfbValue = document.getElementById('ttfb-value');
+    const performanceScore = document.getElementById('performance-score');
+    const performanceScoreCircle = document.getElementById('performance-score-circle');
+    
+    // 可访问性状态元素
+    const accessibilityStatus = document.getElementById('accessibility-status');
+    const accessibilityStatusText = document.getElementById('accessibility-status-text');
+    const contrastStatus = document.getElementById('contrast-status');
+    const keyboardStatus = document.getElementById('keyboard-status');
+    const screenreaderStatus = document.getElementById('screenreader-status');
+    
+    // 性能数据
+    let performanceData = {
+      fcp: null,
+      lcp: null,
+      fid: null,
+      cls: null,
+      ttfb: null
+    };
+    
+    // 显示/隐藏仪表板
+    function toggleDashboard() {
+      const isHidden = dashboard.classList.contains('hidden');
+      if (isHidden) {
+        dashboard.classList.remove('hidden');
+        dashboardTrigger.setAttribute('aria-expanded', 'true');
+        // 刷新指标
+        refreshPerformanceMetrics();
+        checkAccessibilityStatus();
+      } else {
+        dashboard.classList.add('hidden');
+        dashboardTrigger.setAttribute('aria-expanded', 'false');
+      }
+    }
+    
+    // 事件监听器
+    dashboardTrigger.addEventListener('click', toggleDashboard);
+    closeDashboard.addEventListener('click', toggleDashboard);
+    
+    // 点击仪表板外部关闭仪表板
+    document.addEventListener('click', (e) => {
+      if (
+        !dashboard.contains(e.target) &&
+        !dashboardTrigger.contains(e.target) &&
+        !dashboard.classList.contains('hidden')
+      ) {
+        toggleDashboard();
+      }
+    });
+    
+    // 刷新性能指标
+    refreshMetrics.addEventListener('click', refreshPerformanceMetrics);
+    
+    // 运行可访问性测试
+    runAccessibilityTest.addEventListener('click', () => {
+      accessibilityStatusText.textContent = '测试中...';
+      accessibilityStatus.className = 'w-3 h-3 rounded-full mr-2 bg-yellow-500';
+      
+      // 模拟测试过程
+      setTimeout(() => {
+        checkAccessibilityStatus();
+      }, 2000);
+    });
+    
+    // 刷新性能指标
+    function refreshPerformanceMetrics() {
+      // 使用Performance API获取指标
+      if ('performance' in window) {
+        // 获取导航时间
+        const navigation = performance.getEntriesByType('navigation')[0];
+        if (navigation) {
+          performanceData.ttfb = navigation.responseStart - navigation.requestStart;
+          ttfbValue.textContent = formatTime(performanceData.ttfb);
+        }
+        
+        // 获取绘制时间
+        const paintEntries = performance.getEntriesByType('paint');
+        paintEntries.forEach(entry => {
+          if (entry.name === 'first-contentful-paint') {
+            performanceData.fcp = entry.startTime;
+            fcpValue.textContent = formatTime(performanceData.fcp);
+          }
+        });
+        
+        // 使用PerformanceObserver获取其他指标
+        if ('PerformanceObserver' in window) {
+          // LCP
+          try {
+            const lcpObserver = new PerformanceObserver((list) => {
+              const entries = list.getEntries();
+              const lastEntry = entries[entries.length - 1];
+              performanceData.lcp = lastEntry.startTime;
+              lcpValue.textContent = formatTime(performanceData.lcp);
+            });
+            lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+            
+            // 5秒后断开观察
+            setTimeout(() => lcpObserver.disconnect(), 5000);
+          } catch (e) {
+            console.error('LCP观察失败:', e);
+          }
+          
+          // FID
+          try {
+            const fidObserver = new PerformanceObserver((list) => {
+              const entries = list.getEntries();
+              entries.forEach(entry => {
+                if (entry.name === 'first-input') {
+                  performanceData.fid = entry.processingStart - entry.startTime;
+                  fidValue.textContent = formatTime(performanceData.fid);
+                }
+              });
+            });
+            fidObserver.observe({ entryTypes: ['first-input'] });
+            
+            // 10秒后断开观察
+            setTimeout(() => fidObserver.disconnect(), 10000);
+          } catch (e) {
+            console.error('FID观察失败:', e);
+          }
+          
+          // CLS
+          try {
+            let clsValue = 0;
+            const clsObserver = new PerformanceObserver((list) => {
+              const entries = list.getEntries();
+              entries.forEach(entry => {
+                if (!entry.hadRecentInput) {
+                  clsValue += entry.value;
+                  performanceData.cls = clsValue;
+                  clsValue.textContent = clsValue.toFixed(3);
+                }
+              });
+            });
+            clsObserver.observe({ entryTypes: ['layout-shift'] });
+          } catch (e) {
+            console.error('CLS观察失败:', e);
+          }
+        }
+      }
+      
+      // 计算性能评分
+      calculatePerformanceScore();
+    }
+    
+    // 计算性能评分
+    function calculatePerformanceScore() {
+      let score = 100;
+      
+      // FCP评分 (0-1800ms)
+      if (performanceData.fcp !== null) {
+        if (performanceData.fcp > 1800) {
+          score -= Math.min(25, (performanceData.fcp - 1800) / 100);
+        }
+      }
+      
+      // LCP评分 (0-2500ms)
+      if (performanceData.lcp !== null) {
+        if (performanceData.lcp > 2500) {
+          score -= Math.min(25, (performanceData.lcp - 2500) / 100);
+        }
+      }
+      
+      // FID评分 (0-100ms)
+      if (performanceData.fid !== null) {
+        if (performanceData.fid > 100) {
+          score -= Math.min(20, (performanceData.fid - 100) / 10);
+        }
+      }
+      
+      // CLS评分 (0-0.1)
+      if (performanceData.cls !== null) {
+        if (performanceData.cls > 0.1) {
+          score -= Math.min(15, performanceData.cls * 100);
+        }
+      }
+      
+      // TTFB评分 (0-800ms)
+      if (performanceData.ttfb !== null) {
+        if (performanceData.ttfb > 800) {
+          score -= Math.min(15, (performanceData.ttfb - 800) / 50);
+        }
+      }
+      
+      // 确保分数在0-100之间
+      score = Math.max(0, Math.min(100, Math.round(score)));
+      
+      // 更新显示
+      performanceScore.textContent = score;
+      
+      // 更新圆形进度条
+      const circumference = 2 * Math.PI * 36;
+      const offset = circumference - (score / 100) * circumference;
+      performanceScoreCircle.style.strokeDashoffset = offset;
+      
+      // 根据分数设置颜色
+      let colorClass;
+      if (score >= 90) {
+        colorClass = 'text-green-500';
+      } else if (score >= 70) {
+        colorClass = 'text-yellow-500';
+      } else {
+        colorClass = 'text-red-500';
+      }
+      
+      performanceScoreCircle.className = `${colorClass} transition-all duration-500`;
+    }
+    
+    // 检查可访问性状态
+    function checkAccessibilityStatus() {
+      // 检查对比度
+      checkContrast();
+      
+      // 检查键盘导航
+      checkKeyboardNavigation();
+      
+      // 检查屏幕阅读器支持
+      checkScreenReaderSupport();
+      
+      // 更新整体状态
+      updateAccessibilityStatus();
+    }
+    
+    // 检查对比度
+    function checkContrast() {
+      // 简单的对比度检查
+      const hasHighContrast = document.documentElement.classList.contains('high-contrast');
+      
+      if (hasHighContrast) {
+        contrastStatus.textContent = '高';
+        contrastStatus.className = 'text-sm font-medium text-green-600';
+      } else {
+        contrastStatus.textContent = '正常';
+        contrastStatus.className = 'text-sm font-medium text-yellow-600';
+      }
+    }
+    
+    // 检查键盘导航
+    function checkKeyboardNavigation() {
+      // 检查是否有跳过链接
+      const skipLinks = document.querySelectorAll('a[href^="#"], [tabindex]:not([tabindex="-1"])');
+      
+      if (skipLinks.length > 0) {
+        keyboardStatus.textContent = '支持';
+        keyboardStatus.className = 'text-sm font-medium text-green-600';
+      } else {
+        keyboardStatus.textContent = '部分支持';
+        keyboardStatus.className = 'text-sm font-medium text-yellow-600';
+      }
+    }
+    
+    // 检查屏幕阅读器支持
+    function checkScreenReaderSupport() {
+      // 检查是否有alt属性、ARIA标签等
+      const images = document.querySelectorAll('img');
+      const imagesWithAlt = document.querySelectorAll('img[alt]');
+      const elementsWithAria = document.querySelectorAll('[aria-label], [aria-labelledby], [role]');
+      
+      const altPercentage = (imagesWithAlt.length / images.length) * 100;
+      
+      if (altPercentage >= 90 && elementsWithAria.length > 0) {
+        screenreaderStatus.textContent = '良好';
+        screenreaderStatus.className = 'text-sm font-medium text-green-600';
+      } else if (altPercentage >= 70) {
+        screenreaderStatus.textContent = '一般';
+        screenreaderStatus.className = 'text-sm font-medium text-yellow-600';
+      } else {
+        screenreaderStatus.textContent = '需改进';
+        screenreaderStatus.className = 'text-sm font-medium text-red-600';
+      }
+    }
+    
+    // 更新可访问性整体状态
+    function updateAccessibilityStatus() {
+      const contrastGood = contrastStatus.textContent === '高' || contrastStatus.textContent === '正常';
+      const keyboardGood = keyboardStatus.textContent === '支持';
+      const screenreaderGood = screenreaderStatus.textContent === '良好' || screenreaderStatus.textContent === '一般';
+      
+      if (contrastGood && keyboardGood && screenreaderGood) {
+        accessibilityStatus.className = 'w-3 h-3 rounded-full mr-2 bg-green-500';
+        accessibilityStatusText.textContent = '良好';
+      } else if (contrastGood && keyboardGood) {
+        accessibilityStatus.className = 'w-3 h-3 rounded-full mr-2 bg-yellow-500';
+        accessibilityStatusText.textContent = '一般';
+      } else {
+        accessibilityStatus.className = 'w-3 h-3 rounded-full mr-2 bg-red-500';
+        accessibilityStatusText.textContent = '需改进';
+      }
+    }
+    
+    // 格式化时间
+    function formatTime(ms) {
+      if (ms < 1000) {
+        return `${Math.round(ms)}ms`;
+      } else {
+        return `${(ms / 1000).toFixed(2)}s`;
+      }
+    }
+    
+    // 初始化性能监控
+    if ('PerformanceObserver' in window) {
+      // 监控LCP
+      try {
+        const lcpObserver = new PerformanceObserver((list) => {
+          const entries = list.getEntries();
+          const lastEntry = entries[entries.length - 1];
+          performanceData.lcp = lastEntry.startTime;
+          if (!dashboard.classList.contains('hidden')) {
+            lcpValue.textContent = formatTime(performanceData.lcp);
+            calculatePerformanceScore();
+          }
+        });
+        lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+      } catch (e) {
+        console.error('LCP监控失败:', e);
+      }
+      
+      // 监控FID
+      try {
+        const fidObserver = new PerformanceObserver((list) => {
+          const entries = list.getEntries();
+          entries.forEach(entry => {
+            if (entry.name === 'first-input') {
+              performanceData.fid = entry.processingStart - entry.startTime;
+              if (!dashboard.classList.contains('hidden')) {
+                fidValue.textContent = formatTime(performanceData.fid);
+                calculatePerformanceScore();
+              }
+            }
+          });
+        });
+        fidObserver.observe({ entryTypes: ['first-input'] });
+      } catch (e) {
+        console.error('FID监控失败:', e);
+      }
+      
+      // 监控CLS
+      try {
+        let clsValue = 0;
+        const clsObserver = new PerformanceObserver((list) => {
+          const entries = list.getEntries();
+          entries.forEach(entry => {
+            if (!entry.hadRecentInput) {
+              clsValue += entry.value;
+              performanceData.cls = clsValue;
+              if (!dashboard.classList.contains('hidden')) {
+                clsValue.textContent = clsValue.toFixed(3);
+                calculatePerformanceScore();
+              }
+            }
+          });
+        });
+        clsObserver.observe({ entryTypes: ['layout-shift'] });
+      } catch (e) {
+        console.error('CLS监控失败:', e);
+      }
+    }
+  });
+</script>

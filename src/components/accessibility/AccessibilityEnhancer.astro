@@ -1,0 +1,418 @@
+---
+// 可访问性增强组件
+// 提供键盘导航、屏幕阅读器支持和焦点管理等可访问性功能
+---
+
+<div id="accessibility-menu" class="fixed top-20 right-4 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 w-64 hidden" role="dialog" aria-labelledby="accessibility-title" aria-modal="true">
+  <h3 id="accessibility-title" class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">可访问性选项</h3>
+  
+  <div class="space-y-4">
+    <!-- 字体大小调整 -->
+    <div class="flex items-center justify-between">
+      <label for="font-size-slider" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        字体大小
+      </label>
+      <div class="flex items-center space-x-2">
+        <button id="font-size-decrease" class="px-2 py-1 text-sm bg-gray-200 dark:bg-gray-700 rounded" aria-label="减小字体大小">
+          A-
+        </button>
+        <span id="font-size-value" class="text-sm w-8 text-center">100%</span>
+        <button id="font-size-increase" class="px-2 py-1 text-sm bg-gray-200 dark:bg-gray-700 rounded" aria-label="增大字体大小">
+          A+
+        </button>
+      </div>
+    </div>
+    
+    <!-- 行高调整 -->
+    <div class="flex items-center justify-between">
+      <label for="line-height-slider" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        行高
+      </label>
+      <div class="flex items-center space-x-2">
+        <button id="line-height-decrease" class="px-2 py-1 text-sm bg-gray-200 dark:bg-gray-700 rounded" aria-label="减小行高">
+          -
+        </button>
+        <span id="line-height-value" class="text-sm w-8 text-center">1.5</span>
+        <button id="line-height-increase" class="px-2 py-1 text-sm bg-gray-200 dark:bg-gray-700 rounded" aria-label="增大行高">
+          +
+        </button>
+      </div>
+    </div>
+    
+    <!-- 高对比度模式 -->
+    <div class="flex items-center justify-between">
+      <label for="high-contrast-toggle" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        高对比度模式
+      </label>
+      <button id="high-contrast-toggle" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" role="switch" aria-checked="false" aria-label="切换高对比度模式">
+        <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1"></span>
+      </button>
+    </div>
+    
+    <!-- 焦点指示器 -->
+    <div class="flex items-center justify-between">
+      <label for="focus-indicator-toggle" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        增强焦点指示器
+      </label>
+      <button id="focus-indicator-toggle" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" role="switch" aria-checked="false" aria-label="切换焦点指示器">
+        <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1"></span>
+      </button>
+    </div>
+    
+    <!-- 阅读模式 -->
+    <div class="flex items-center justify-between">
+      <label for="reading-mode-toggle" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        阅读模式
+      </label>
+      <button id="reading-mode-toggle" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" role="switch" aria-checked="false" aria-label="切换阅读模式">
+        <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1"></span>
+      </button>
+    </div>
+  </div>
+  
+  <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+    <button id="reset-accessibility" class="w-full py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+      重置为默认设置
+    </button>
+  </div>
+  
+  <button id="close-accessibility" class="absolute top-2 right-2 p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="关闭可访问性菜单">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+    </svg>
+  </button>
+</div>
+
+<!-- 可访问性菜单触发按钮 -->
+<button id="accessibility-trigger" class="fixed bottom-4 right-4 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 z-40" aria-label="打开可访问性选项">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+  </svg>
+</button>
+
+<script is:inline>
+  // 可访问性功能实现
+  document.addEventListener('DOMContentLoaded', () => {
+    // 获取DOM元素
+    const accessibilityMenu = document.getElementById('accessibility-menu');
+    const accessibilityTrigger = document.getElementById('accessibility-trigger');
+    const closeAccessibility = document.getElementById('close-accessibility');
+    const resetAccessibility = document.getElementById('reset-accessibility');
+    
+    // 字体大小控制
+    const fontSizeDecrease = document.getElementById('font-size-decrease');
+    const fontSizeIncrease = document.getElementById('font-size-increase');
+    const fontSizeValue = document.getElementById('font-size-value');
+    
+    // 行高控制
+    const lineHeightDecrease = document.getElementById('line-height-decrease');
+    const lineHeightIncrease = document.getElementById('line-height-increase');
+    const lineHeightValue = document.getElementById('line-height-value');
+    
+    // 高对比度模式
+    const highContrastToggle = document.getElementById('high-contrast-toggle');
+    
+    // 焦点指示器
+    const focusIndicatorToggle = document.getElementById('focus-indicator-toggle');
+    
+    // 阅读模式
+    const readingModeToggle = document.getElementById('reading-mode-toggle');
+    
+    // 可访问性设置
+    let accessibilitySettings = {
+      fontSize: 100,
+      lineHeight: 1.5,
+      highContrast: false,
+      focusIndicator: false,
+      readingMode: false
+    };
+    
+    // 从localStorage加载设置
+    const savedSettings = localStorage.getItem('accessibility-settings');
+    if (savedSettings) {
+      try {
+        accessibilitySettings = { ...accessibilitySettings, ...JSON.parse(savedSettings) };
+        applySettings();
+      } catch (e) {
+        console.warn('Failed to load accessibility settings:', e);
+      }
+    }
+    
+    // 应用设置
+    function applySettings() {
+      // 应用字体大小
+      document.documentElement.style.fontSize = `${accessibilitySettings.fontSize}%`;
+      fontSizeValue.textContent = `${accessibilitySettings.fontSize}%`;
+      
+      // 应用行高
+      document.documentElement.style.setProperty('--line-height', accessibilitySettings.lineHeight);
+      document.body.style.lineHeight = accessibilitySettings.lineHeight;
+      lineHeightValue.textContent = accessibilitySettings.lineHeight.toFixed(1);
+      
+      // 应用高对比度模式
+      if (accessibilitySettings.highContrast) {
+        document.documentElement.classList.add('high-contrast');
+        highContrastToggle.querySelector('span').style.transform = 'translateX(1.25rem)';
+        highContrastToggle.setAttribute('aria-checked', 'true');
+      } else {
+        document.documentElement.classList.remove('high-contrast');
+        highContrastToggle.querySelector('span').style.transform = 'translateX(0.25rem)';
+        highContrastToggle.setAttribute('aria-checked', 'false');
+      }
+      
+      // 应用焦点指示器
+      if (accessibilitySettings.focusIndicator) {
+        document.documentElement.classList.add('enhanced-focus');
+        focusIndicatorToggle.querySelector('span').style.transform = 'translateX(1.25rem)';
+        focusIndicatorToggle.setAttribute('aria-checked', 'true');
+      } else {
+        document.documentElement.classList.remove('enhanced-focus');
+        focusIndicatorToggle.querySelector('span').style.transform = 'translateX(0.25rem)';
+        focusIndicatorToggle.setAttribute('aria-checked', 'false');
+      }
+      
+      // 应用阅读模式
+      if (accessibilitySettings.readingMode) {
+        document.documentElement.classList.add('reading-mode');
+        readingModeToggle.querySelector('span').style.transform = 'translateX(1.25rem)';
+        readingModeToggle.setAttribute('aria-checked', 'true');
+      } else {
+        document.documentElement.classList.remove('reading-mode');
+        readingModeToggle.querySelector('span').style.transform = 'translateX(0.25rem)';
+        readingModeToggle.setAttribute('aria-checked', 'false');
+      }
+    }
+    
+    // 保存设置到localStorage
+    function saveSettings() {
+      localStorage.setItem('accessibility-settings', JSON.stringify(accessibilitySettings));
+    }
+    
+    // 显示/隐藏可访问性菜单
+    function toggleAccessibilityMenu() {
+      const isHidden = accessibilityMenu.classList.contains('hidden');
+      if (isHidden) {
+        accessibilityMenu.classList.remove('hidden');
+        accessibilityTrigger.setAttribute('aria-expanded', 'true');
+        // 设置焦点到第一个可聚焦元素
+        accessibilityMenu.querySelector('button').focus();
+      } else {
+        accessibilityMenu.classList.add('hidden');
+        accessibilityTrigger.setAttribute('aria-expanded', 'false');
+      }
+    }
+    
+    // 事件监听器
+    accessibilityTrigger.addEventListener('click', toggleAccessibilityMenu);
+    closeAccessibility.addEventListener('click', toggleAccessibilityMenu);
+    
+    // 点击菜单外部关闭菜单
+    document.addEventListener('click', (e) => {
+      if (
+        !accessibilityMenu.contains(e.target) &&
+        !accessibilityTrigger.contains(e.target) &&
+        !accessibilityMenu.classList.contains('hidden')
+      ) {
+        toggleAccessibilityMenu();
+      }
+    });
+    
+    // ESC键关闭菜单
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !accessibilityMenu.classList.contains('hidden')) {
+        toggleAccessibilityMenu();
+        accessibilityTrigger.focus();
+      }
+    });
+    
+    // 字体大小调整
+    fontSizeDecrease.addEventListener('click', () => {
+      if (accessibilitySettings.fontSize > 80) {
+        accessibilitySettings.fontSize -= 10;
+        applySettings();
+        saveSettings();
+      }
+    });
+    
+    fontSizeIncrease.addEventListener('click', () => {
+      if (accessibilitySettings.fontSize < 150) {
+        accessibilitySettings.fontSize += 10;
+        applySettings();
+        saveSettings();
+      }
+    });
+    
+    // 行高调整
+    lineHeightDecrease.addEventListener('click', () => {
+      if (accessibilitySettings.lineHeight > 1.2) {
+        accessibilitySettings.lineHeight -= 0.1;
+        applySettings();
+        saveSettings();
+      }
+    });
+    
+    lineHeightIncrease.addEventListener('click', () => {
+      if (accessibilitySettings.lineHeight < 2.0) {
+        accessibilitySettings.lineHeight += 0.1;
+        applySettings();
+        saveSettings();
+      }
+    });
+    
+    // 高对比度模式切换
+    highContrastToggle.addEventListener('click', () => {
+      accessibilitySettings.highContrast = !accessibilitySettings.highContrast;
+      applySettings();
+      saveSettings();
+    });
+    
+    // 焦点指示器切换
+    focusIndicatorToggle.addEventListener('click', () => {
+      accessibilitySettings.focusIndicator = !accessibilitySettings.focusIndicator;
+      applySettings();
+      saveSettings();
+    });
+    
+    // 阅读模式切换
+    readingModeToggle.addEventListener('click', () => {
+      accessibilitySettings.readingMode = !accessibilitySettings.readingMode;
+      applySettings();
+      saveSettings();
+    });
+    
+    // 重置设置
+    resetAccessibility.addEventListener('click', () => {
+      accessibilitySettings = {
+        fontSize: 100,
+        lineHeight: 1.5,
+        highContrast: false,
+        focusIndicator: false,
+        readingMode: false
+      };
+      applySettings();
+      saveSettings();
+    });
+    
+    // 键盘导航增强
+    function enhanceKeyboardNavigation() {
+      // 为所有可聚焦元素添加更好的焦点样式
+      const focusableElements = 'a, button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])';
+      
+      document.addEventListener('keydown', (e) => {
+        // Tab键导航
+        if (e.key === 'Tab') {
+          document.body.classList.add('keyboard-navigation');
+        }
+      });
+      
+      document.addEventListener('mousedown', () => {
+        document.body.classList.remove('keyboard-navigation');
+      });
+    }
+    
+    // 跳转到主内容链接
+    function addSkipToContentLink() {
+      const skipLink = document.createElement('a');
+      skipLink.href = '#main-content';
+      skipLink.textContent = '跳转到主内容';
+      skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-md z-50';
+      document.body.insertBefore(skipLink, document.body.firstChild);
+    }
+    
+    // 初始化可访问性功能
+    enhanceKeyboardNavigation();
+    addSkipToContentLink();
+  });
+</script>
+
+<style>
+  /* 高对比度模式样式 */
+  .high-contrast {
+    --bg-primary: #ffffff;
+    --bg-secondary: #000000;
+    --text-primary: #000000;
+    --text-secondary: #ffffff;
+    --border-color: #000000;
+    --accent-color: #0000ff;
+  }
+  
+  .high-contrast,
+  .high-contrast * {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+  }
+  
+  .high-contrast .dark,
+  .high-contrast .dark * {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-secondary) !important;
+  }
+  
+  /* 增强焦点指示器 */
+  .enhanced-focus *:focus {
+    outline: 3px solid #0066cc !important;
+    outline-offset: 2px !important;
+  }
+  
+  /* 阅读模式样式 */
+  .reading-mode {
+    --reading-bg: #fffef7;
+    --reading-text: #333333;
+    --reading-width: 650px;
+  }
+  
+  .reading-mode body {
+    background-color: var(--reading-bg) !important;
+    color: var(--reading-text) !important;
+    max-width: var(--reading-width);
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.8;
+  }
+  
+  .reading-mode img,
+  .reading-mode video,
+  .reading-mode iframe {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .reading-mode .sidebar,
+  .reading-mode .footer,
+  .reading-mode .navigation,
+  .reading-mode .related-posts,
+  .reading-mode .comments {
+    display: none !important;
+  }
+  
+  /* 键盘导航样式 */
+  .keyboard-navigation *:focus {
+    outline: 2px solid #0066cc;
+    outline-offset: 2px;
+  }
+  
+  /* 屏幕阅读器专用样式 */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  
+  .focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+</style>
