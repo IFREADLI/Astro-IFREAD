@@ -34,8 +34,9 @@ const { results, query, totalPosts } = Astro.props;
                 <a 
                   href={result.url} 
                   class="text-accent hover:text-accent/80 transition-colors"
-                  set:html={result.highlightedTitle || result.title}
-                />
+                >
+                  <span set:html={result.highlightedTitle || result.title}></span>
+                </a>
               </h3>
               
               <!-- 文章元信息 -->
@@ -58,7 +59,9 @@ const { results, query, totalPosts } = Astro.props;
               </div>
               
               <!-- 文章描述 -->
-              <div class="mb-4 text-gray-700 dark:text-gray-300" set:html={result.highlightedDescription || result.description} />
+              <div class="mb-4 text-gray-700 dark:text-gray-300">
+                <span set:html={result.highlightedDescription || result.description}></span>
+              </div>
               
               <!-- 标签 -->
               {result.tags && result.tags.length > 0 && (

@@ -1,27 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-  --bg-primary: 255 255 255;
-  --bg-secondary: 249 250 251;
-  --text-primary: 17 24 39;
-  --text-secondary: 75 85 99;
-  --accent: 59 130 246;
-  --accent-hover: 37 99 235;
-}
-
-[data-theme="dark"] {
-  --bg-primary: 17 24 39;
-  --bg-secondary: 31 41 55;
-  --text-primary: 243 244 246;
-  --text-secondary: 156 163 175;
-  --accent: 96 165 250;
-  --accent-hover: 59 130 246;
-}
-
-body {
-  background-color: rgb(var(--bg-primary));
-  color: rgb(var(--text-primary));
-  transition: background-color 0.3s ease, color 0.3s ease;
-}

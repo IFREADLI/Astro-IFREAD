@@ -7,6 +7,7 @@ image:
   url: 'https://picsum.photos/seed/astro-framework/800/400.jpg'
   alt: 'Astro框架'
 tags: ['Astro', '静态网站', '前端框架']
+category: '技术'
 draft: false
 ---
 
