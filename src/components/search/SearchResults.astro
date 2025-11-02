@@ -137,13 +137,13 @@ const { results, query, totalPosts } = Astro.props;
   }
 
   .search-suggestion-item:hover,
-  .search-suggestion-item.focus {
+  .search-suggestion-item:focus {
     background-color: #f3f4f6;
   }
 
   @media (prefers-color-scheme: dark) {
     .search-suggestion-item:hover,
-    .search-suggestion-item.focus {
+    .search-suggestion-item:focus {
       background-color: #374151;
     }
   }
