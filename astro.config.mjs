@@ -3,18 +3,13 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
-import { ExpressiveCode } from 'astro-expressive-code';
+import expressiveCode from 'astro-expressive-code';
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://minimal-blog.example.com',
   integrations: [
-    mdx(),
-    tailwind({
-      applyBaseStyles: false,
-    }),
-    sitemap(),
-    ExpressiveCode({
+    expressiveCode({
       themes: [
         {
           name: 'github-light-default',
@@ -38,6 +33,11 @@ export default defineConfig({
         style: 'classic',
       },
     }),
+    mdx(),
+    tailwind({
+      applyBaseStyles: false,
+    }),
+    sitemap(),
   ],
   vite: {
     optimizeDeps: {
