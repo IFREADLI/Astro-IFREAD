@@ -4,7 +4,7 @@ import SearchButton from '../components/ui/SearchButton.astro';
 import ThemeToggle from '../components/ui/ThemeToggle.astro';
 ---
 
-<header class="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
+<header class="sticky top-0 z-50 w-full border-b border-theme bg-primary/80 backdrop-blur-md transition-theme">
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
       <!-- Logo和标题 -->
@@ -17,7 +17,7 @@ import ThemeToggle from '../components/ui/ThemeToggle.astro';
             width="32" 
             height="32"
           />
-          <span class="text-xl font-bold text-gray-900 dark:text-white">
+          <span class="text-xl font-bold text-primary">
             {SITE.title}
           </span>
         </a>
@@ -45,7 +45,7 @@ import ThemeToggle from '../components/ui/ThemeToggle.astro';
         <!-- 移动端菜单按钮 -->
         <button
           id="mobile-menu-button"
-          class="md:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+          class="md:hidden p-2 rounded-md text-secondary hover:text-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-inset focus-ring"
           aria-controls="mobile-menu"
           aria-expanded="false"
         >
@@ -65,14 +65,14 @@ import ThemeToggle from '../components/ui/ThemeToggle.astro';
 
   <!-- 移动端菜单 -->
   <div id="mobile-menu" class="hidden md:hidden">
-    <div class="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+    <div class="px-2 pt-2 pb-3 space-y-1 bg-primary border-t border-theme">
       {NAVIGATION.map((item) => (
         <a
           href={item.href}
-          class={`block px-3 py-2 rounded-md text-base font-medium ${
+          class={`block px-3 py-2 rounded-md text-base font-medium transition-theme ${
             Astro.url.pathname === item.href
-              ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
-              : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
+              ? 'text-accent bg-accent/10'
+              : 'text-secondary hover:text-primary hover:bg-secondary'
           }`}
         >
           {item.name}

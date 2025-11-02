@@ -9,6 +9,10 @@ interface Props {
   decoding?: 'async' | 'sync' | 'auto';
   priority?: boolean;
   caption?: string;
+  sizes?: string;
+  srcset?: string;
+  format?: 'webp' | 'avif' | 'png' | 'jpg';
+  quality?: number;
 }
 
 const { 
@@ -20,16 +24,43 @@ const {
   loading = 'lazy',
   decoding = 'async',
   priority = false,
-  caption
+  caption,
+  sizes,
+  srcset,
+  format = 'webp',
+  quality = 80
 } = Astro.props;
 
 // 如果是优先加载的图片，设置loading为eager
 const finalLoading = priority ? 'eager' : loading;
+
+// 生成不同尺寸的图片
+const generateSrcSet = (baseSrc: string, format: string) => {
+  const widths = [320, 640, 768, 1024, 1280, 1536];
+  return widths
+    .map(w => `${baseSrc}?w=${w}&f=${format}&q=${quality} ${w}w`)
+    .join(', ');
+};
+
+// 生成默认的sizes属性
+const defaultSizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw';
+
+// 检查是否为外部图片
+const isExternal = (src: string) => {
+  return src.startsWith('http') || src.startsWith('//');
+};
+
+// 如果是外部图片，直接使用原始src
+const imageSrc = isExternal(src) ? src : src;
+const imageSrcset = isExternal(src) ? undefined : (srcset || generateSrcSet(src, format));
+const imageSizes = sizes || defaultSizes;
 ---
 
 <figure class="image-container {className}">
   <img
-    src={src}
+    src={imageSrc}
+    srcset={imageSrcset}
+    sizes={imageSizes}
     alt={alt}
     width={width}
     height={height}
@@ -38,7 +69,7 @@ const finalLoading = priority ? 'eager' : loading;
     class="w-full h-auto rounded-lg shadow-md"
   />
   {caption && (
-    <figcaption class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+    <figcaption class="mt-2 text-center text-sm text-secondary">
       {caption}
     </figcaption>
   )}

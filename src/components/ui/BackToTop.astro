@@ -1,0 +1,51 @@
+---
+// 返回顶部按钮组件
+// 提供平滑滚动到页面顶部的功能
+---
+
+<button 
+  id="back-to-top" 
+  class="fixed bottom-8 right-8 w-12 h-12 bg-accent text-white rounded-full shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300 hover:bg-accent/90 z-40"
+  aria-label="返回顶部"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+</button>
+
+<script>
+  // 返回顶部按钮逻辑
+  document.addEventListener('DOMContentLoaded', () => {
+    const backToTopButton = document.getElementById('back-to-top');
+    if (!backToTopButton) return;
+    
+    // 显示/隐藏按钮
+    function toggleButton() {
+      // 当页面滚动超过300px时显示按钮
+      if (window.pageYOffset > 300) {
+        backToTopButton.classList.remove('opacity-0', 'invisible');
+        backToTopButton.classList.add('opacity-100', 'visible');
+      } else {
+        backToTopButton.classList.add('opacity-0', 'invisible');
+        backToTopButton.classList.remove('opacity-100', 'visible');
+      }
+    }
+    
+    // 滚动到顶部
+    function scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+    
+    // 监听滚动事件
+    window.addEventListener('scroll', toggleButton);
+    
+    // 监听点击事件
+    backToTopButton.addEventListener('click', scrollToTop);
+    
+    // 初始化按钮状态
+    toggleButton();
+  });
+</script>

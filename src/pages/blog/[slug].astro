@@ -1,11 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import Header from '../../layouts/Header.astro';
-import Footer from '../../layouts/Footer.astro';
-import { getCollection } from 'astro:content';
 import PostContent from '../../components/blog/PostContent.astro';
 import TableOfContents from '../../components/blog/TableOfContents.astro';
 import ReadingProgress from '../../components/blog/ReadingProgress.astro';
+import { getCollection } from 'astro:content';
 import { getAdjacentPosts, extractHeadings } from '../../utils/content';
 import type { CollectionEntry } from 'astro:content';
 
@@ -31,17 +29,32 @@ const allPosts = await getCollection('blog', ({ data }) => {
 // 获取上一篇/下一篇文章
 const { prev, next } = getAdjacentPosts(post, allPosts);
 
-// 渲染文章内容
-const { Content } = await post.render();
-
 // 提取文章内容中的标题
 const content = await post.render();
 const headings = extractHeadings(content.html);
+
+// 准备SEO数据
+const seoData = {
+  title: post.data.title,
+  description: post.data.description,
+  image: post.data.image,
+  type: 'BlogPosting',
+  keywords: post.data.tags,
+  author: post.data.author,
+  publishedTime: post.data.publishDate.toISOString(),
+  modifiedTime: post.data.updatedDate?.toISOString() || post.data.publishDate.toISOString(),
+  articleSection: post.data.category,
+  tags: post.data.tags,
+  noIndex: post.data.draft,
+  structuredData: {
+    wordCount: post.data.wordCount,
+    readingTime: post.data.readingTime
+  }
+};
 ---
 
-<Layout title={`${post.data.title} - 极简博客`} description={post.data.description}>
+<Layout {...seoData}>
   <ReadingProgress />
-  <Header />
   
   <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -61,6 +74,4 @@ const headings = extractHeadings(content.html);
       </aside>
     </div>
   </main>
-  
-  <Footer />
 </Layout>

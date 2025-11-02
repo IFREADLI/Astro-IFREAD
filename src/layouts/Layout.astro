@@ -3,6 +3,8 @@ import '../styles/global.css';
 import { SITE } from '../utils/config';
 import Header from './Header.astro';
 import Footer from './Footer.astro';
+import SEO from '../components/seo/SEO.astro';
+import PerformanceMonitor from '../components/performance/PerformanceMonitor.astro';
 import { getCollection } from 'astro:content';
 
 interface Props {
@@ -11,7 +13,14 @@ interface Props {
   image?: string;
   url?: string;
   type?: string;
+  keywords?: string[];
+  author?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
+  articleSection?: string;
+  tags?: string[];
   noIndex?: boolean;
+  structuredData?: Record<string, any>;
 }
 
 const {
@@ -20,7 +29,14 @@ const {
   image = SITE.image,
   url = SITE.url,
   type = 'website',
+  keywords,
+  author,
+  publishedTime,
+  modifiedTime,
+  articleSection,
+  tags,
   noIndex = false,
+  structuredData
 } = Astro.props;
 
 // 获取站点配置
@@ -36,37 +52,29 @@ const postCount = posts.filter(post => !post.data.draft).length;
 ---
 
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="zh-CN" data-theme="system">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     
-    <!-- SEO Meta Tags -->
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalUrl} />
-    {noIndex && <meta name="robots" content="noindex,nofollow" />}
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content={type} />
-    <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL(image, Astro.site)} />
-    <meta property="og:site_name" content={site.title} />
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={canonicalUrl} />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={new URL(image, Astro.site)} />
-    
-    <!-- 站点信息 -->
-    <meta name="author" content={site.author} />
-    <meta name="theme-color" content="#3b82f6" />
+    <!-- SEO组件 -->
+    <SEO 
+      title={title}
+      description={description}
+      image={image}
+      url={canonicalUrl}
+      type={type}
+      keywords={keywords}
+      author={author || site.author}
+      publishedTime={publishedTime}
+      modifiedTime={modifiedTime}
+      articleSection={articleSection}
+      tags={tags}
+      noIndex={noIndex}
+      structuredData={structuredData}
+    />
     
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title={`${site.title} RSS Feed`} href="/rss.xml" />
@@ -77,18 +85,57 @@ const postCount = posts.filter(post => !post.data.draft).length;
     <!-- 字体 -->
     <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
     
-    <!-- 脚本 -->
+    <!-- 主题初始化脚本 -->
     <script is:inline>
-      // 主题检测和设置
+      // 主题系统初始化
       (function() {
-        const theme = localStorage.getItem('theme') || 
-                     (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-theme', theme);
+        // 获取保存的主题设置，默认为系统主题
+        const savedTheme = localStorage.getItem('theme') || 'system';
+        
+        // 应用主题
+        function applyTheme(theme) {
+          document.documentElement.setAttribute('data-theme', theme);
+          
+          // 触发自定义事件，通知主题已更改
+          window.dispatchEvent(new CustomEvent('themechange', {
+            detail: { theme }
+          }));
+        }
+        
+        // 初始化主题
+        applyTheme(savedTheme);
+        
+        // 如果是系统主题，监听系统主题变化
+        if (savedTheme === 'system') {
+          const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+          
+          // 监听系统主题变化
+          mediaQuery.addEventListener('change', () => {
+            applyTheme('system');
+          });
+        }
+        
+        // 提供全局主题切换函数
+        window.setTheme = function(theme) {
+          localStorage.setItem('theme', theme);
+          applyTheme(theme);
+        };
+        
+        // 提供全局获取当前主题函数
+        window.getCurrentTheme = function() {
+          const savedTheme = localStorage.getItem('theme') || 'system';
+          
+          if (savedTheme === 'system') {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          
+          return savedTheme;
+        };
       })();
     </script>
   </head>
   
-  <body class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+  <body class="min-h-screen flex flex-col transition-theme">
     <Header />
     
     <main class="flex-grow">
@@ -96,52 +143,28 @@ const postCount = posts.filter(post => !post.data.draft).length;
     </main>
     
     <Footer />
+    <!-- Google Analytics -->
+    {SITE.analytics.googleAnalyticsId && (
+      <script async src={`https://www.googletagmanager.com/gtag/js?id=${SITE.analytics.googleAnalyticsId}`}></script>
+    )}
+    {SITE.analytics.googleAnalyticsId && (
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{SITE.analytics.googleAnalyticsId}');
+      </script>
+    )}
     
-    <!-- 主题切换脚本 -->
-    <script is:inline>
-      // 主题切换功能
-      document.addEventListener('DOMContentLoaded', () => {
-        const themeToggle = document.getElementById('theme-toggle');
-        
-        if (themeToggle) {
-          themeToggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-          });
-        }
-      });
-    </script>
+    <!-- Plausible Analytics -->
+    {SITE.analytics.plausibleDomain && (
+      <script defer data-domain={SITE.analytics.plausibleDomain} src="https://plausible.io/js/plausible.js"></script>
+    )}
+    
+    <!-- Service Worker 注册脚本 -->
+    <script is:inline src="/scripts/sw-register.js"></script>
+    
+    <!-- 性能监控组件 -->
+    <PerformanceMonitor />
   </body>
 </html>
-
-<style>
-  /* 确保页面过渡效果 */
-  body {
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-  
-  /* 平滑滚动 */
-  html {
-    scroll-behavior: smooth;
-  }
-  
-  /* 焦点样式 */
-  :focus-visible {
-    outline: 2px solid theme('colors.primary.500');
-    outline-offset: 2px;
-  }
-  
-  /* 选择文本样式 */
-  ::selection {
-    background-color: theme('colors.primary.100');
-    color: theme('colors.primary.900');
-  }
-  
-  [data-theme="dark"] ::selection {
-    background-color: theme('colors.primary.900');
-    color: theme('colors.primary.100');
-  }
-</style>

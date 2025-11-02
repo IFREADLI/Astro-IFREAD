@@ -1,0 +1,219 @@
+---
+// 分页组件
+// 提供分页导航功能
+
+export interface Props {
+  id?: string;
+  currentPage: number;
+  totalPages: number;
+  visiblePages?: number;
+  showFirstLast?: boolean;
+  showPrevNext?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'outlined' | 'text';
+  alignment?: 'left' | 'center' | 'right';
+}
+
+const { 
+  id = 'pagination-' + Math.random().toString(36).substring(2, 9),
+  currentPage,
+  totalPages,
+  visiblePages = 5,
+  showFirstLast = true,
+  showPrevNext = true,
+  size = 'md',
+  variant = 'default',
+  alignment = 'center'
+} = Astro.props;
+
+// 计算页码范围
+function calculatePageRange(current: number, total: number, visible: number) {
+  if (total <= visible) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  
+  let start = Math.max(1, current - Math.floor(visible / 2));
+  let end = start + visible - 1;
+  
+  if (end > total) {
+    end = total;
+    start = Math.max(1, end - visible + 1);
+  }
+  
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
+const pageRange = calculatePageRange(currentPage, totalPages, visiblePages);
+const hasPrevPage = currentPage > 1;
+const hasNextPage = currentPage < totalPages;
+const showStartEllipsis = pageRange[0] > 2;
+const showEndEllipsis = pageRange[pageRange.length - 1] < totalPages - 1;
+
+// 根据大小设置样式
+const sizeClasses = {
+  sm: 'px-2 py-1 text-xs',
+  md: 'px-3 py-2 text-sm',
+  lg: 'px-4 py-3 text-base'
+};
+
+// 根据变体设置样式
+const buttonClasses = {
+  default: {
+    base: 'bg-primary dark:bg-secondary text-text-primary border border-border hover:bg-secondary dark:hover:bg-tertiary transition-colors duration-200',
+    active: 'bg-accent text-white border-accent',
+    disabled: 'opacity-50 cursor-not-allowed'
+  },
+  outlined: {
+    base: 'bg-transparent text-text-primary border border-border hover:bg-secondary dark:hover:bg-tertiary transition-colors duration-200',
+    active: 'bg-accent text-white border-accent',
+    disabled: 'opacity-50 cursor-not-allowed'
+  },
+  text: {
+    base: 'bg-transparent text-text-primary hover:bg-secondary dark:hover:bg-tertiary transition-colors duration-200',
+    active: 'bg-accent text-white',
+    disabled: 'opacity-50 cursor-not-allowed'
+  }
+};
+
+// 根据对齐方式设置样式
+const alignmentClasses = {
+  left: 'justify-start',
+  center: 'justify-center',
+  right: 'justify-end'
+};
+---
+
+<div class="pagination-container" data-pagination-id={id}>
+  <nav class="flex items-center space-x-1 ${alignmentClasses[alignment]}" role="navigation" aria-label="分页导航">
+    {showFirstLast && (
+      <button
+        class={`${sizeClasses[size]} ${!hasPrevPage ? buttonClasses[variant].disabled : buttonClasses[variant].base} rounded-md`}
+        disabled={!hasPrevPage}
+        aria-label="第一页"
+        data-page="1"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" />
+          <path d="M8.707 5.293a1 1 0 010 1.414L5.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" />
+        </svg>
+      </button>
+    )}
+    
+    {showPrevNext && (
+      <button
+        class={`${sizeClasses[size]} ${!hasPrevPage ? buttonClasses[variant].disabled : buttonClasses[variant].base} rounded-md`}
+        disabled={!hasPrevPage}
+        aria-label="上一页"
+        data-page={hasPrevPage ? currentPage - 1 : null}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    )}
+    
+    {showStartEllipsis && (
+      <>
+        <button
+          class={`${sizeClasses[size]} ${buttonClasses[variant].base} rounded-md`}
+          data-page="1"
+        >
+          1
+        </button>
+        <span class={`${sizeClasses[size]} px-1`}>...</span>
+      </>
+    )}
+    
+    {pageRange.map(page => (
+      <button
+        key={page}
+        class={`${sizeClasses[size]} ${page === currentPage ? buttonClasses[variant].active : buttonClasses[variant].base} rounded-md`}
+        aria-current={page === currentPage ? 'page' : undefined}
+        data-page={page}
+      >
+        {page}
+      </button>
+    ))}
+    
+    {showEndEllipsis && (
+      <>
+        <span class={`${sizeClasses[size]} px-1`}>...</span>
+        <button
+          class={`${sizeClasses[size]} ${buttonClasses[variant].base} rounded-md`}
+          data-page={totalPages}
+        >
+          {totalPages}
+        </button>
+      </>
+    )}
+    
+    {showPrevNext && (
+      <button
+        class={`${sizeClasses[size]} ${!hasNextPage ? buttonClasses[variant].disabled : buttonClasses[variant].base} rounded-md`}
+        disabled={!hasNextPage}
+        aria-label="下一页"
+        data-page={hasNextPage ? currentPage + 1 : null}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    )}
+    
+    {showFirstLast && (
+      <button
+        class={`${sizeClasses[size]} ${!hasNextPage ? buttonClasses[variant].disabled : buttonClasses[variant].base} rounded-md`}
+        disabled={!hasNextPage}
+        aria-label="最后一页"
+        data-page={totalPages}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" />
+          <path d="M11.293 14.707a1 1 0 010-1.414L14.586 10l-3.293-3.293a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" />
+        </svg>
+      </button>
+    )}
+  </nav>
+</div>
+
+<script>
+  // 分页逻辑
+  document.addEventListener('DOMContentLoaded', () => {
+    // 获取所有分页容器
+    const paginationContainers = document.querySelectorAll('.pagination-container');
+    
+    paginationContainers.forEach(container => {
+      const paginationId = container.getAttribute('data-pagination-id');
+      const buttons = container.querySelectorAll('[data-page]');
+      
+      // 为每个按钮添加点击事件
+      buttons.forEach(button => {
+        button.addEventListener('click', () => {
+          const page = button.getAttribute('data-page');
+          
+          if (page) {
+            // 触发页面变化事件
+            const event = new CustomEvent('pagination:change', { 
+              detail: { 
+                id: paginationId,
+                page: parseInt(page)
+              }
+            });
+            document.dispatchEvent(event);
+          }
+        });
+      });
+      
+      // 暴露全局方法
+      window[`goToPage_${paginationId}`] = (page) => {
+        const event = new CustomEvent('pagination:change', { 
+          detail: { 
+            id: paginationId,
+            page
+          }
+        });
+        document.dispatchEvent(event);
+      };
+    });
+  });
+</script>

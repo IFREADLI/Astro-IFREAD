@@ -1,0 +1,148 @@
+---
+// 下拉菜单组件
+// 提供下拉菜单功能
+
+export interface Props {
+  id?: string;
+  trigger?: 'click' | 'hover';
+  position?: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
+  width?: 'auto' | 'sm' | 'md' | 'lg' | 'full';
+  align?: 'left' | 'right';
+}
+
+const { 
+  id = 'dropdown-' + Math.random().toString(36).substring(2, 9),
+  trigger = 'click',
+  position = 'bottom-left',
+  width = 'auto',
+  align = 'left'
+} = Astro.props;
+
+// 根据位置设置样式
+const positionClasses = {
+  'bottom-left': 'top-full left-0 mt-1',
+  'bottom-right': 'top-full right-0 mt-1',
+  'top-left': 'bottom-full left-0 mb-1',
+  'top-right': 'bottom-full right-0 mb-1'
+};
+
+// 根据宽度设置样式
+const widthClasses = {
+  auto: 'w-auto',
+  sm: 'w-48',
+  md: 'w-56',
+  lg: 'w-64',
+  full: 'w-full'
+};
+---
+
+<div class="dropdown-container relative inline-block" data-dropdown-id={id}>
+  <slot name="trigger" />
+  
+  <div 
+    id={id}
+    class={`dropdown absolute z-50 ${positionClasses[position]} ${widthClasses[width]} bg-primary dark:bg-secondary rounded-md shadow-lg border border-border opacity-0 invisible transition-all duration-200 transform scale-95 origin-${align === 'left' ? 'top-left' : 'top-right'}`}
+  >
+    <slot />
+  </div>
+</div>
+
+<script>
+  // 下拉菜单逻辑
+  document.addEventListener('DOMContentLoaded', () => {
+    // 获取所有下拉菜单容器
+    const dropdownContainers = document.querySelectorAll('.dropdown-container');
+    
+    dropdownContainers.forEach(container => {
+      const dropdownId = container.getAttribute('data-dropdown-id');
+      const dropdown = document.getElementById(dropdownId);
+      
+      if (!dropdown) return;
+      
+      // 获取配置
+      const trigger = container.getAttribute('data-trigger') || 'click';
+      const triggerElement = container.querySelector('[data-dropdown-trigger]');
+      
+      // 显示下拉菜单
+      function showDropdown() {
+        // 关闭其他下拉菜单
+        document.querySelectorAll('.dropdown').forEach(d => {
+          if (d !== dropdown) {
+            d.classList.add('opacity-0', 'invisible', 'scale-95');
+            d.classList.remove('opacity-100', 'visible', 'scale-100');
+          }
+        });
+        
+        dropdown.classList.remove('opacity-0', 'invisible', 'scale-95');
+        dropdown.classList.add('opacity-100', 'visible', 'scale-100');
+      }
+      
+      // 隐藏下拉菜单
+      function hideDropdown() {
+        dropdown.classList.add('opacity-0', 'invisible', 'scale-95');
+        dropdown.classList.remove('opacity-100', 'visible', 'scale-100');
+      }
+      
+      // 切换下拉菜单
+      function toggleDropdown() {
+        if (dropdown.classList.contains('opacity-0')) {
+          showDropdown();
+        } else {
+          hideDropdown();
+        }
+      }
+      
+      // 根据触发类型添加事件监听
+      if (trigger === 'click') {
+        // 使用指定的触发元素或容器本身
+        const element = triggerElement || container;
+        
+        element.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleDropdown();
+        });
+      } else if (trigger === 'hover') {
+        container.addEventListener('mouseenter', showDropdown);
+        container.addEventListener('mouseleave', hideDropdown);
+      }
+      
+      // 处理下拉菜单项点击
+      dropdown.querySelectorAll('[data-dropdown-item]').forEach(item => {
+        item.addEventListener('click', (e) => {
+          // 如果项目有关闭属性，则关闭下拉菜单
+          if (item.getAttribute('data-dropdown-close') !== 'false') {
+            hideDropdown();
+          }
+          
+          // 触发自定义事件
+          const event = new CustomEvent('dropdown:item-click', { 
+            detail: { 
+              id: dropdownId,
+              value: item.getAttribute('data-value'),
+              item
+            }
+          });
+          document.dispatchEvent(event);
+        });
+      });
+    });
+    
+    // 点击文档关闭所有下拉菜单
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.dropdown').forEach(dropdown => {
+        dropdown.classList.add('opacity-0', 'invisible', 'scale-95');
+        dropdown.classList.remove('opacity-100', 'visible', 'scale-100');
+      });
+    });
+    
+    // 监听ESC键关闭下拉菜单
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+          dropdown.classList.add('opacity-0', 'invisible', 'scale-95');
+          dropdown.classList.remove('opacity-100', 'visible', 'scale-100');
+        });
+      }
+    });
+  });
+</script>

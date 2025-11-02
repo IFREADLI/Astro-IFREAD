@@ -1,0 +1,232 @@
+---
+// 手风琴组件
+// 提供可折叠的内容区域
+
+export interface Props {
+  id?: string;
+  allowMultiple?: boolean;
+  defaultOpen?: number | number[];
+  variant?: 'default' | 'bordered' | 'separated';
+  size?: 'sm' | 'md' | 'lg';
+}
+
+const { 
+  id = 'accordion-' + Math.random().toString(36).substring(2, 9),
+  allowMultiple = false,
+  defaultOpen = allowMultiple ? [] : 0,
+  variant = 'default',
+  size = 'md'
+} = Astro.props;
+
+// 根据变体设置样式
+const variantClasses = {
+  default: 'divide-y divide-border',
+  bordered: 'border border-border rounded-md overflow-hidden',
+  separated: 'space-y-2'
+};
+
+const itemClasses = {
+  default: '',
+  bordered: 'border-b border-border last:border-b-0',
+  separated: 'border border-border rounded-md'
+};
+
+// 根据大小设置样式
+const sizeClasses = {
+  sm: {
+    header: 'py-2 px-3 text-sm',
+    content: 'py-2 px-3 text-sm'
+  },
+  md: {
+    header: 'py-3 px-4 text-base',
+    content: 'py-3 px-4 text-base'
+  },
+  lg: {
+    header: 'py-4 px-5 text-lg',
+    content: 'py-4 px-5 text-lg'
+  }
+};
+---
+
+<div class="accordion-container" data-accordion-id={id} data-allow-multiple={allowMultiple} data-default-open={JSON.stringify(defaultOpen)}>
+  <div class={`accordion ${variantClasses[variant]}`}>
+    <slot />
+  </div>
+</div>
+
+<script>
+  // 手风琴逻辑
+  document.addEventListener('DOMContentLoaded', () => {
+    // 获取所有手风琴容器
+    const accordionContainers = document.querySelectorAll('.accordion-container');
+    
+    accordionContainers.forEach(container => {
+      const accordionId = container.getAttribute('data-accordion-id');
+      const allowMultiple = container.getAttribute('data-allow-multiple') === 'true';
+      const defaultOpen = JSON.parse(container.getAttribute('data-default-open') || '0');
+      
+      // 获取所有手风琴项
+      const items = container.querySelectorAll('[data-accordion-item]');
+      
+      if (!items.length) return;
+      
+      // 初始化打开状态
+      let openItems = Array.isArray(defaultOpen) ? [...defaultOpen] : [defaultOpen];
+      
+      // 切换手风琴项
+      function toggleItem(index) {
+        if (index < 0 || index >= items.length) return;
+        
+        const item = items[index];
+        const header = item.querySelector('[data-accordion-header]');
+        const content = item.querySelector('[data-accordion-content]');
+        const icon = item.querySelector('[data-accordion-icon]');
+        
+        if (!header || !content) return;
+        
+        const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+        
+        if (isOpen) {
+          // 关闭项
+          content.style.maxHeight = '0px';
+          content.classList.add('overflow-hidden');
+          content.setAttribute('aria-hidden', 'true');
+          header.setAttribute('aria-expanded', 'false');
+          
+          if (icon) {
+            icon.style.transform = '';
+          }
+          
+          // 从打开项列表中移除
+          openItems = openItems.filter(i => i !== index);
+        } else {
+          // 打开项
+          content.style.maxHeight = content.scrollHeight + 'px';
+          content.classList.remove('overflow-hidden');
+          content.setAttribute('aria-hidden', 'false');
+          header.setAttribute('aria-expanded', 'true');
+          
+          if (icon) {
+            icon.style.transform = 'rotate(180deg)';
+          }
+          
+          // 如果不允许同时打开多项，则关闭其他项
+          if (!allowMultiple) {
+            items.forEach((otherItem, otherIndex) => {
+              if (otherIndex !== index) {
+                const otherContent = otherItem.querySelector('[data-accordion-content]');
+                const otherHeader = otherItem.querySelector('[data-accordion-header]');
+                const otherIcon = otherItem.querySelector('[data-accordion-icon]');
+                
+                if (otherContent) {
+                  otherContent.style.maxHeight = '0px';
+                  otherContent.classList.add('overflow-hidden');
+                  otherContent.setAttribute('aria-hidden', 'true');
+                }
+                
+                if (otherHeader) {
+                  otherHeader.setAttribute('aria-expanded', 'false');
+                }
+                
+                if (otherIcon) {
+                  otherIcon.style.transform = '';
+                }
+              }
+            });
+            
+            openItems = [index];
+          } else {
+            // 添加到打开项列表
+            if (!openItems.includes(index)) {
+              openItems.push(index);
+            }
+          }
+        }
+        
+        // 触发自定义事件
+        const event = new CustomEvent('accordion:change', { 
+          detail: { 
+            id: accordionId,
+            index,
+            isOpen: !isOpen,
+            openItems: [...openItems],
+            item,
+            content
+          }
+        });
+        document.dispatchEvent(event);
+      }
+      
+      // 为每个手风琴项的头部添加点击事件
+      items.forEach((item, index) => {
+        const header = item.querySelector('[data-accordion-header]');
+        const content = item.querySelector('[data-accordion-content]');
+        const icon = item.querySelector('[data-accordion-icon]');
+        
+        if (header && content) {
+          // 初始化内容状态
+          content.classList.add('overflow-hidden', 'transition-all', 'duration-300');
+          content.style.maxHeight = '0px';
+          content.setAttribute('aria-hidden', 'true');
+          header.setAttribute('aria-expanded', 'false');
+          header.setAttribute('tabindex', '0');
+          
+          if (icon) {
+            icon.style.transition = 'transform 0.3s';
+          }
+          
+          // 添加点击事件
+          header.addEventListener('click', () => {
+            toggleItem(index);
+          });
+          
+          // 添加键盘事件
+          header.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleItem(index);
+            }
+          });
+        }
+      });
+      
+      // 初始化打开默认项
+      if (openItems.length > 0) {
+        openItems.forEach(index => {
+          if (typeof index === 'number' && index >= 0 && index < items.length) {
+            const content = items[index].querySelector('[data-accordion-content]');
+            const header = items[index].querySelector('[data-accordion-header]');
+            const icon = items[index].querySelector('[data-accordion-icon]');
+            
+            if (content) {
+              content.style.maxHeight = content.scrollHeight + 'px';
+              content.classList.remove('overflow-hidden');
+              content.setAttribute('aria-hidden', 'false');
+            }
+            
+            if (header) {
+              header.setAttribute('aria-expanded', 'true');
+            }
+            
+            if (icon) {
+              icon.style.transform = 'rotate(180deg)';
+            }
+          }
+        });
+      }
+      
+      // 暴露全局方法
+      window[`toggleAccordion_${accordionId}`] = toggleItem;
+      window[`openAccordion_${accordionId}`] = (index) => {
+        if (!openItems.includes(index)) {
+          toggleItem(index);
+        }
+      };
+      window[`closeAccordion_${accordionId}`] = (index) => {
+        if (openItems.includes(index)) {
+          toggleItem(index);
+        }
+      };
+    });
+  });
+</script>

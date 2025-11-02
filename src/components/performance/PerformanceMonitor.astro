@@ -1,0 +1,170 @@
+---
+// 性能监控组件
+// 用于跟踪页面加载性能和用户体验指标
+---
+
+<script is:inline>
+  // 性能监控函数
+  function trackPerformance() {
+    // 检查浏览器是否支持Performance API
+    if (!window.performance || !window.performance.timing) {
+      console.warn('Performance API not supported');
+      return;
+    }
+
+    // 获取性能数据
+    const timing = window.performance.timing;
+    const navigation = window.performance.navigation;
+
+    // 计算关键性能指标
+    const metrics = {
+      // DNS查询时间
+      dnsTime: timing.domainLookupEnd - timing.domainLookupStart,
+      
+      // TCP连接时间
+      tcpTime: timing.connectEnd - timing.connectStart,
+      
+      // 请求响应时间
+      requestTime: timing.responseEnd - timing.requestStart,
+      
+      // DOM解析时间
+      domParseTime: timing.domComplete - timing.domLoading,
+      
+      // 首次内容绘制时间
+      firstContentfulPaint: 0,
+      
+      // 最大内容绘制时间
+      largestContentfulPaint: 0,
+      
+      // 首次输入延迟
+      firstInputDelay: 0,
+      
+      // 累积布局偏移
+      cumulativeLayoutShift: 0,
+      
+      // 页面加载总时间
+      pageLoadTime: timing.loadEventEnd - timing.navigationStart,
+      
+      // 首字节时间
+      timeToFirstByte: timing.responseStart - timing.navigationStart,
+      
+      // DOM交互时间
+      domInteractive: timing.domInteractive - timing.navigationStart,
+      
+      // 导航类型
+      navigationType: navigation.type,
+      
+      // 重定向次数
+      redirectCount: navigation.redirectCount
+    };
+
+    // 使用PerformanceObserver获取更精确的指标
+    if ('PerformanceObserver' in window) {
+      // 首次内容绘制
+      const observerFCP = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.name === 'first-contentful-paint') {
+            metrics.firstContentfulPaint = entry.startTime;
+          }
+        });
+      });
+      
+      // 最大内容绘制
+      const observerLCP = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        const lastEntry = entries[entries.length - 1];
+        metrics.largestContentfulPaint = lastEntry.startTime;
+      });
+      
+      // 首次输入延迟
+      const observerFID = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'first-input') {
+            metrics.firstInputDelay = entry.processingStart - entry.startTime;
+          }
+        });
+      });
+      
+      // 累积布局偏移
+      let clsValue = 0;
+      const observerCLS = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (!entry.hadRecentInput) {
+            clsValue += entry.value;
+          }
+        });
+        metrics.cumulativeLayoutShift = clsValue;
+      });
+      
+      // 开始观察
+      try {
+        observerFCP.observe({ entryTypes: ['paint'] });
+        observerLCP.observe({ entryTypes: ['largest-contentful-paint'] });
+        observerFID.observe({ entryTypes: ['first-input'] });
+        observerCLS.observe({ entryTypes: ['layout-shift'] });
+      } catch (e) {
+        console.warn('PerformanceObserver not fully supported:', e);
+      }
+    }
+
+    // 延迟发送性能数据，确保所有指标都已收集
+    setTimeout(() => {
+      // 发送性能数据到分析服务
+      sendPerformanceData(metrics);
+      
+      // 在控制台输出性能数据（开发环境）
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('Performance Metrics:', metrics);
+      }
+    }, 3000);
+  }
+
+  // 发送性能数据到分析服务
+  function sendPerformanceData(metrics) {
+    // 这里可以发送到Google Analytics、自定义分析服务等
+    // 示例：发送到Google Analytics 4
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'page_load_time', {
+        custom_parameter: metrics.pageLoadTime,
+        event_category: 'performance',
+        non_interaction: true
+      });
+      
+      gtag('event', 'first_contentful_paint', {
+        custom_parameter: metrics.firstContentfulPaint,
+        event_category: 'performance',
+        non_interaction: true
+      });
+      
+      gtag('event', 'largest_contentful_paint', {
+        custom_parameter: metrics.largestContentfulPaint,
+        event_category: 'performance',
+        non_interaction: true
+      });
+    }
+    
+    // 示例：发送到自定义端点
+    // fetch('/api/performance', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({
+    //     url: window.location.href,
+    //     userAgent: navigator.userAgent,
+    //     timestamp: new Date().toISOString(),
+    //     metrics
+    //   })
+    // }).catch(err => console.error('Failed to send performance data:', err));
+  }
+
+  // 页面加载完成后执行性能监控
+  if (document.readyState === 'complete') {
+    trackPerformance();
+  } else {
+    window.addEventListener('load', trackPerformance);
+  }
+</script>

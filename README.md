@@ -1,46 +1,235 @@
-# Astro Starter Kit: Basics
+# Astro-IFREAD 博客项目
 
-```sh
-npm create astro@latest -- --template basics
+这是一个使用 Astro 框架构建的现代博客系统，具有响应式设计、深色模式切换、性能优化等功能。
+
+## 特性
+
+- 🚀 **高性能**：基于 Astro 的静态站点生成，加载速度快
+- 📱 **响应式设计**：适配各种设备尺寸
+- 🌙 **深色模式**：支持明暗主题切换
+- 🔍 **搜索功能**：内置全文搜索
+- 🏷️ **标签系统**：文章分类和标签管理
+- 📊 **性能监控**：内置性能监控工具
+- ♿ **无障碍访问**：遵循 WCAG 标准
+- 🎨 **现代UI**：使用 Tailwind CSS 构建精美界面
+- 🔧 **SEO优化**：内置 SEO 优化配置
+
+## 技术栈
+
+- **框架**：Astro
+- **样式**：Tailwind CSS
+- **内容**：Markdown
+- **类型检查**：TypeScript
+- **部署**：Vercel/Netlify
+
+## 项目结构
+
+```
+src/
+├── components/          # 组件目录
+│   ├── ui/             # UI组件
+│   ├── layout/         # 布局组件
+│   └── blog/           # 博客相关组件
+├── content/            # 内容目录
+│   └── blog/           # 博客文章
+├── layouts/            # 布局模板
+├── pages/              # 页面文件
+├── scripts/            # 脚本文件
+├── styles/             # 样式文件
+└── utils/              # 工具函数
+public/                 # 静态资源
+scripts/                # 构建脚本
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 快速开始
 
-## 🚀 Project Structure
+### 环境要求
 
-Inside of your Astro project, you'll see the following folders and files:
+- Node.js 18.0.0 或更高版本
+- npm 或 yarn
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+### 安装依赖
+
+```bash
+npm install
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+### 开发模式
 
-## 🧞 Commands
+```bash
+npm run dev
+```
 
-All commands are run from the root of the project, from a terminal:
+访问 http://localhost:4321 查看网站。
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+### 构建生产版本
 
-## 👀 Want to learn more?
+```bash
+npm run build
+```
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+### 预览生产版本
+
+```bash
+npm run preview
+```
+
+## 内容管理
+
+### 创建新文章
+
+在 `src/content/blog/` 目录下创建新的 Markdown 文件，文件名格式为 `slug.md`。
+
+文章 frontmatter 示例：
+
+```yaml
+---
+title: '文章标题'
+pubDate: 2023-01-01
+description: '文章描述'
+author: '作者名'
+image:
+  url: 'https://example.com/image.jpg'
+  alt: '图片描述'
+tags: ['标签1', '标签2']
+draft: false
+---
+
+# 文章内容
+
+这里是文章的正文内容...
+```
+
+### 文章分类
+
+文章通过标签进行分类，可以在 frontmatter 中添加 `tags` 字段。
+
+### 图片资源
+
+图片可以放在 `public/images/` 目录下，或者使用外部图片链接。
+
+## 自定义配置
+
+### 网站信息
+
+在 `src/config/site.ts` 文件中修改网站基本信息：
+
+```typescript
+export const siteConfig = {
+  title: '你的博客标题',
+  description: '你的博客描述',
+  author: '你的名字',
+  url: 'https://your-domain.com',
+  // ...
+};
+```
+
+### 主题配置
+
+在 `src/config/theme.ts` 文件中修改主题配置：
+
+```typescript
+export const themeConfig = {
+  defaultTheme: 'light',
+  enableThemeToggle: true,
+  // ...
+};
+```
+
+### 导航菜单
+
+在 `src/config/navigation.ts` 文件中修改导航菜单：
+
+```typescript
+export const navigation = [
+  { name: '首页', href: '/' },
+  { name: '博客', href: '/blog' },
+  { name: '关于', href: '/about' },
+  // ...
+];
+```
+
+## 部署
+
+### Vercel
+
+1. 将代码推送到 GitHub
+2. 在 Vercel 中导入项目
+3. 配置环境变量（如果有）
+4. 部署
+
+### Netlify
+
+1. 将代码推送到 GitHub
+2. 在 Netlify 中导入项目
+3. 配置构建设置：
+   - 构建命令：`npm run build`
+   - 发布目录：`dist`
+4. 部署
+
+### 其他平台
+
+这个项目可以部署到任何支持静态网站的托管平台。
+
+## 性能优化
+
+项目内置了多种性能优化功能：
+
+- 图片优化：自动生成不同尺寸的图片
+- 代码分割：按需加载 JavaScript
+- 缓存策略：Service Worker 缓存静态资源
+- 压缩：HTML、CSS、JS 文件压缩
+
+运行以下命令进行性能分析：
+
+```bash
+npm run analyze-performance
+```
+
+## 开发指南
+
+### 添加新页面
+
+在 `src/pages/` 目录下创建新的 Astro 文件或 Markdown 文件。
+
+### 创建组件
+
+在 `src/components/` 目录下创建新的组件文件。
+
+### 修改样式
+
+使用 Tailwind CSS 类名修改样式，或者在 `src/styles/` 目录下添加自定义样式。
+
+### 添加脚本
+
+在 `src/scripts/` 目录下添加 JavaScript 脚本。
+
+## 贡献指南
+
+欢迎提交 Issue 和 Pull Request！
+
+1. Fork 项目
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
+
+## 许可证
+
+本项目采用 MIT 许可证。详情请参阅 [LICENSE](LICENSE) 文件。
+
+## 致谢
+
+感谢以下开源项目：
+
+- [Astro](https://astro.build/) - 现代静态网站生成器
+- [Tailwind CSS](https://tailwindcss.com/) - 实用优先的 CSS 框架
+- [Lucide](https://lucide.dev/) - 美观的图标库
+
+## 联系方式
+
+如果你有任何问题或建议，欢迎通过以下方式联系我：
+
+- 邮箱：lijnf@example.com
+- GitHub：[github.com/lijnf](https://github.com/lijnf)
+- Twitter：[@lijnf_dev](https://twitter.com/lijnf_dev)

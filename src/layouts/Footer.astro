@@ -2,7 +2,7 @@
 import { SITE, FOOTER_LINKS } from '../utils/config';
 ---
 
-<footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+<footer class="bg-primary border-t border-theme">
   <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
       <!-- 站点信息 -->
@@ -15,18 +15,18 @@ import { SITE, FOOTER_LINKS } from '../utils/config';
             width="32" 
             height="32"
           />
-          <span class="text-xl font-bold text-gray-900 dark:text-white">
+          <span class="text-xl font-bold text-primary">
             {SITE.title}
           </span>
         </div>
-        <p class="text-gray-600 dark:text-gray-400 mb-4">
+        <p class="text-secondary mb-4">
           {SITE.description}
         </p>
         <div class="flex space-x-4">
           {SITE.social.map((item) => (
             <a
               href={item.url}
-              class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+              class="text-tertiary hover:text-secondary transition-colors"
               aria-label={item.name}
             >
               <span class="sr-only">{item.name}</span>
@@ -42,7 +42,7 @@ import { SITE, FOOTER_LINKS } from '../utils/config';
       <!-- 链接列 -->
       {FOOTER_LINKS.map((column) => (
         <div class="col-span-1">
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase mb-4">
+          <h3 class="text-sm font-semibold text-primary tracking-wider uppercase mb-4">
             {column.title}
           </h3>
           <ul class="space-y-2">
@@ -50,7 +50,7 @@ import { SITE, FOOTER_LINKS } from '../utils/config';
               <li>
                 <a
                   href={link.href}
-                  class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  class="text-secondary hover:text-accent transition-colors"
                 >
                   {link.name}
                 </a>
@@ -62,8 +62,8 @@ import { SITE, FOOTER_LINKS } from '../utils/config';
     </div>
 
     <!-- 版权信息 -->
-    <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
-      <p class="text-center text-gray-500 dark:text-gray-400 text-sm">
+    <div class="mt-8 pt-8 border-t border-theme">
+      <p class="text-center text-tertiary text-sm">
         &copy; {new Date().getFullYear()} {SITE.title}. 保留所有权利。
       </p>
     </div>

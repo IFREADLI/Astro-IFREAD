@@ -1,0 +1,206 @@
+---
+// 通知组件
+// 用于显示各种类型的通知消息
+
+export interface Props {
+  id?: string;
+  type?: 'info' | 'success' | 'warning' | 'error';
+  title?: string;
+  message?: string;
+  duration?: number;
+  closable?: boolean;
+  show?: boolean;
+}
+
+const { 
+  id = 'notification-' + Math.random().toString(36).substring(2, 9),
+  type = 'info',
+  title = '',
+  message = '',
+  duration = 5000,
+  closable = true,
+  show = false
+} = Astro.props;
+---
+
+<div 
+  id={id}
+  class={`notification fixed top-20 right-4 max-w-sm p-4 rounded-lg shadow-lg transform transition-all duration-300 z-50 ${
+    type === 'info' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-l-4 border-blue-500' : 
+    type === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-l-4 border-green-500' : 
+    type === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-l-4 border-yellow-500' : 
+    type === 'error' ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-l-4 border-red-500' : 
+    'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'
+  } ${show ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}
+  role="alert"
+>
+  <div class="flex">
+    <div class="flex-shrink-0">
+      {type === 'info' && (
+        <svg class="h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+        </svg>
+      )}
+      {type === 'success' && (
+        <svg class="h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        </svg>
+      )}
+      {type === 'warning' && (
+        <svg class="h-5 w-5 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+        </svg>
+      )}
+      {type === 'error' && (
+        <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+      )}
+    </div>
+    <div class="ml-3 flex-1">
+      {title && <h3 class="text-sm font-medium">{title}</h3>}
+      {message && <div class="text-sm mt-1">{message}</div>}
+    </div>
+    {closable && (
+      <div class="ml-auto pl-3">
+        <div class="-mx-1.5 -my-1.5">
+          <button
+            type="button"
+            class={`inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              type === 'info' ? 'text-blue-500 hover:bg-blue-100 focus:ring-blue-500' : 
+              type === 'success' ? 'text-green-500 hover:bg-green-100 focus:ring-green-500' : 
+              type === 'warning' ? 'text-yellow-500 hover:bg-yellow-100 focus:ring-yellow-500' : 
+              type === 'error' ? 'text-red-500 hover:bg-red-100 focus:ring-red-500' : 
+              'text-gray-500 hover:bg-gray-100 focus:ring-gray-500'
+            }`}
+            onclick={`closeNotification('${id}')`}
+            aria-label="关闭"
+          >
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+</div>
+
+<script>
+  // 通知管理逻辑
+  document.addEventListener('DOMContentLoaded', () => {
+    // 创建通知容器
+    if (!document.getElementById('notification-container')) {
+      const container = document.createElement('div');
+      container.id = 'notification-container';
+      container.className = 'fixed top-20 right-4 z-50 space-y-2';
+      document.body.appendChild(container);
+    }
+    
+    // 关闭通知函数
+    window.closeNotification = function(id) {
+      const notification = document.getElementById(id);
+      if (notification) {
+        notification.classList.add('translate-x-full', 'opacity-0');
+        notification.classList.remove('translate-x-0', 'opacity-100');
+        
+        // 延迟移除DOM元素
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 300);
+      }
+    };
+    
+    // 显示通知函数
+    window.showNotification = function(options) {
+      const {
+        type = 'info',
+        title = '',
+        message = '',
+        duration = 5000,
+        closable = true
+      } = options;
+      
+      // 创建通知ID
+      const id = 'notification-' + Math.random().toString(36).substring(2, 9);
+      
+      // 创建通知元素
+      const notification = document.createElement('div');
+      notification.id = id;
+      notification.className = `notification max-w-sm p-4 rounded-lg shadow-lg transform transition-all duration-300 z-50 ${
+        type === 'info' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-l-4 border-blue-500' : 
+        type === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-l-4 border-green-500' : 
+        type === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-l-4 border-yellow-500' : 
+        type === 'error' ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-l-4 border-red-500' : 
+        'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'
+      } translate-x-0 opacity-100`;
+      notification.setAttribute('role', 'alert');
+      
+      // 构建通知内容
+      let iconHtml = '';
+      if (type === 'info') {
+        iconHtml = '<svg class="h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>';
+      } else if (type === 'success') {
+        iconHtml = '<svg class="h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>';
+      } else if (type === 'warning') {
+        iconHtml = '<svg class="h-5 w-5 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>';
+      } else if (type === 'error') {
+        iconHtml = '<svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>';
+      }
+      
+      let closeButtonHtml = '';
+      if (closable) {
+        closeButtonHtml = `
+          <div class="ml-auto pl-3">
+            <div class="-mx-1.5 -my-1.5">
+              <button
+                type="button"
+                class="inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  type === 'info' ? 'text-blue-500 hover:bg-blue-100 focus:ring-blue-500' : 
+                  type === 'success' ? 'text-green-500 hover:bg-green-100 focus:ring-green-500' : 
+                  type === 'warning' ? 'text-yellow-500 hover:bg-yellow-100 focus:ring-yellow-500' : 
+                  type === 'error' ? 'text-red-500 hover:bg-red-100 focus:ring-red-500' : 
+                  'text-gray-500 hover:bg-gray-100 focus:ring-gray-500'
+                }"
+                onclick="closeNotification('${id}')"
+                aria-label="关闭"
+              >
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+      
+      notification.innerHTML = `
+        <div class="flex">
+          <div class="flex-shrink-0">${iconHtml}</div>
+          <div class="ml-3 flex-1">
+            ${title ? `<h3 class="text-sm font-medium">${title}</h3>` : ''}
+            ${message ? `<div class="text-sm mt-1">${message}</div>` : ''}
+          </div>
+          ${closeButtonHtml}
+        </div>
+      `;
+      
+      // 添加到容器
+      const container = document.getElementById('notification-container');
+      if (container) {
+        container.appendChild(notification);
+        
+        // 自动关闭
+        if (duration > 0) {
+          setTimeout(() => {
+            window.closeNotification(id);
+          }, duration);
+        }
+      }
+      
+      return id;
+    };
+  });
+</script>

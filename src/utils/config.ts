@@ -15,6 +15,8 @@ export const SITE = {
   logo: '/logo.svg',
   favicon: '/favicon.svg',
   image: '/og-image.jpg',
+  locale: 'zh-CN',
+  type: 'website',
   social: [
     {
       name: 'GitHub',
@@ -35,6 +37,31 @@ export const SITE = {
   analytics: {
     googleAnalyticsId: 'G-XXXXXXXXXX',
     plausibleDomain: 'minimal-blog.example.com',
+  },
+  // SEO配置
+  seo: {
+    enableRobotsTxt: true,
+    enableSitemap: true,
+    changeFrequency: 'weekly',
+    priority: 0.7,
+    // 结构化数据
+    structuredData: {
+      enable: true,
+      type: 'Blog',
+      publisher: {
+        '@type': 'Organization',
+        name: 'IFREAD blog',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://minimal-blog.example.com/logo.svg',
+        },
+      },
+      author: {
+        '@type': 'Person',
+        name: 'IFREAD',
+        email: 'author@example.com',
+      },
+    },
   },
 };
 

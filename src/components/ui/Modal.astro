@@ -1,0 +1,253 @@
+---
+// 模态框组件
+// 用于显示对话框、确认框等
+
+export interface Props {
+  id?: string;
+  title?: string;
+  show?: boolean;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  closable?: boolean;
+  backdrop?: boolean;
+  center?: boolean;
+}
+
+const { 
+  id = 'modal-' + Math.random().toString(36).substring(2, 9),
+  title = '',
+  show = false,
+  size = 'md',
+  closable = true,
+  backdrop = true,
+  center = true
+} = Astro.props;
+
+// 根据大小设置样式
+const sizeClasses = {
+  sm: 'max-w-md',
+  md: 'max-w-lg',
+  lg: 'max-w-2xl',
+  xl: 'max-w-4xl',
+  full: 'max-w-full mx-4'
+};
+
+const modalClass = center 
+  ? 'fixed inset-0 z-50 overflow-y-auto flex items-center justify-center'
+  : 'fixed inset-0 z-50 overflow-y-auto flex items-start pt-20';
+---
+
+<div 
+  id={id}
+  class={`${modalClass} ${show ? 'block' : 'hidden'}`}
+  aria-labelledby={`${id}-title`}
+  role="dialog"
+  aria-modal="true"
+>
+  {backdrop && (
+    <div 
+      class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+      onclick={`closeModal('${id}')`}
+    ></div>
+  )}
+  
+  <div class={`${sizeClasses[size]} w-full bg-primary dark:bg-secondary rounded-lg shadow-xl transform transition-all ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'} relative`}>
+    {title && (
+      <div class="flex items-center justify-between p-4 border-b border-border">
+        <h3 id={`${id}-title`} class="text-lg font-medium text-primary dark:text-white">{title}</h3>
+        {closable && (
+          <button
+            type="button"
+            class="text-secondary hover:text-primary dark:hover:text-white transition-colors"
+            onclick={`closeModal('${id}')`}
+            aria-label="关闭"
+          >
+            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
+    )}
+    
+    <div class="p-4">
+      <slot />
+    </div>
+  </div>
+</div>
+
+<script>
+  // 模态框管理逻辑
+  document.addEventListener('DOMContentLoaded', () => {
+    // 创建模态框容器
+    if (!document.getElementById('modal-container')) {
+      const container = document.createElement('div');
+      container.id = 'modal-container';
+      document.body.appendChild(container);
+    }
+    
+    // 关闭模态框函数
+    window.closeModal = function(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.classList.add('hidden');
+        
+        // 触发关闭事件
+        const event = new CustomEvent('modal:closed', { detail: { id } });
+        document.dispatchEvent(event);
+      }
+    };
+    
+    // 显示模态框函数
+    window.showModal = function(options) {
+      const {
+        id = 'modal-' + Math.random().toString(36).substring(2, 9),
+        title = '',
+        content = '',
+        size = 'md',
+        closable = true,
+        backdrop = true,
+        center = true,
+        footer = null
+      } = options;
+      
+      // 检查是否已存在相同ID的模态框
+      let modal = document.getElementById(id);
+      
+      if (!modal) {
+        // 创建模态框元素
+        modal = document.createElement('div');
+        modal.id = id;
+        modal.className = center 
+          ? 'fixed inset-0 z-50 overflow-y-auto flex items-center justify-center'
+          : 'fixed inset-0 z-50 overflow-y-auto flex items-start pt-20';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        
+        // 构建模态框内容
+        const sizeClass = size === 'sm' ? 'max-w-md' : 
+                         size === 'lg' ? 'max-w-2xl' : 
+                         size === 'xl' ? 'max-w-4xl' : 
+                         size === 'full' ? 'max-w-full mx-4' : 'max-w-lg';
+        
+        let titleHtml = '';
+        if (title) {
+          titleHtml = `
+            <div class="flex items-center justify-between p-4 border-b border-border">
+              <h3 id="${id}-title" class="text-lg font-medium text-primary dark:text-white">${title}</h3>
+              ${closable ? `
+                <button
+                  type="button"
+                  class="text-secondary hover:text-primary dark:hover:text-white transition-colors"
+                  onclick="closeModal('${id}')"
+                  aria-label="关闭"
+                >
+                  <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              ` : ''}
+            </div>
+          `;
+        }
+        
+        let footerHtml = '';
+        if (footer) {
+          footerHtml = `
+            <div class="flex items-center justify-end p-4 border-t border-border">
+              ${footer}
+            </div>
+          `;
+        }
+        
+        modal.innerHTML = `
+          ${backdrop ? `<div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onclick="closeModal('${id}')"></div>` : ''}
+          <div class="${sizeClass} w-full bg-primary dark:bg-secondary rounded-lg shadow-xl transform transition-all relative">
+            ${titleHtml}
+            <div class="p-4">
+              ${content}
+            </div>
+            ${footerHtml}
+          </div>
+        `;
+        
+        // 添加到容器
+        const container = document.getElementById('modal-container');
+        if (container) {
+          container.appendChild(modal);
+        }
+      }
+      
+      // 显示模态框
+      modal.classList.remove('hidden');
+      
+      // 触发显示事件
+      const event = new CustomEvent('modal:shown', { detail: { id } });
+      document.dispatchEvent(event);
+      
+      return id;
+    };
+    
+    // 确认对话框函数
+    window.showConfirm = function(options) {
+      const {
+        title = '确认',
+        message = '确定要执行此操作吗？',
+        confirmText = '确定',
+        cancelText = '取消',
+        confirmClass = 'bg-accent text-white hover:bg-accent/90',
+        cancelClass = 'bg-secondary text-primary dark:text-white hover:bg-secondary/80',
+        onConfirm = null,
+        onCancel = null
+      } = options;
+      
+      const id = 'confirm-' + Math.random().toString(36).substring(2, 9);
+      
+      const footer = `
+        <button
+          type="button"
+          class="px-4 py-2 rounded-md ${cancelClass} mr-2"
+          onclick="closeConfirmModal('${id}', false)"
+        >
+          ${cancelText}
+        </button>
+        <button
+          type="button"
+          class="px-4 py-2 rounded-md ${confirmClass}"
+          onclick="closeConfirmModal('${id}', true)"
+        >
+          ${confirmText}
+        </button>
+      `;
+      
+      window.showModal({
+        id,
+        title,
+        content: `<p>${message}</p>`,
+        footer
+      });
+      
+      // 关闭确认对话框函数
+      window.closeConfirmModal = function(modalId, confirmed) {
+        window.closeModal(modalId);
+        
+        if (confirmed && onConfirm) {
+          onConfirm();
+        } else if (!confirmed && onCancel) {
+          onCancel();
+        }
+      };
+      
+      return id;
+    };
+    
+    // 监听ESC键关闭模态框
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modals = document.querySelectorAll('[role="dialog"]:not(.hidden)');
+        if (modals.length > 0) {
+          window.closeModal(modals[modals.length - 1].id);
+        }
+      }
+    });
+  });
+</script>

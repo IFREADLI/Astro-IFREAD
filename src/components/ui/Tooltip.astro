@@ -1,0 +1,165 @@
+---
+// 工具提示组件
+// 提供悬停提示功能
+
+export interface Props {
+  id?: string;
+  content: string;
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  trigger?: 'hover' | 'click' | 'focus';
+  size?: 'sm' | 'md' | 'lg';
+  color?: 'primary' | 'secondary' | 'accent';
+  delay?: number;
+  arrow?: boolean;
+}
+
+const { 
+  id = 'tooltip-' + Math.random().toString(36).substring(2, 9),
+  content,
+  position = 'top',
+  trigger = 'hover',
+  size = 'md',
+  color = 'primary',
+  delay = 0,
+  arrow = true
+} = Astro.props;
+
+// 根据位置设置样式
+const positionClasses = {
+  top: 'bottom-full left-1/2 transform -translate-x-1/2 mb-2',
+  bottom: 'top-full left-1/2 transform -translate-x-1/2 mt-2',
+  left: 'right-full top-1/2 transform -translate-y-1/2 mr-2',
+  right: 'left-full top-1/2 transform -translate-y-1/2 ml-2'
+};
+
+const arrowClasses = {
+  top: 'top-full left-1/2 transform -translate-x-1/2 -mt-1 border-l-transparent border-r-transparent border-b-transparent border-t-current',
+  bottom: 'bottom-full left-1/2 transform -translate-x-1/2 -mb-1 border-l-transparent border-r-transparent border-t-transparent border-b-current',
+  left: 'left-full top-1/2 transform -translate-y-1/2 -ml-1 border-t-transparent border-b-transparent border-r-transparent border-l-current',
+  right: 'right-full top-1/2 transform -translate-y-1/2 -mr-1 border-t-transparent border-b-transparent border-l-transparent border-r-current'
+};
+
+// 根据大小设置样式
+const sizeClasses = {
+  sm: 'px-2 py-1 text-xs',
+  md: 'px-3 py-2 text-sm',
+  lg: 'px-4 py-3 text-base'
+};
+
+// 根据颜色设置样式
+const colorClasses = {
+  primary: 'bg-primary text-white dark:bg-secondary dark:text-primary',
+  secondary: 'bg-secondary text-primary dark:bg-primary dark:text-secondary',
+  accent: 'bg-accent text-white'
+};
+---
+
+<div class="tooltip-container relative inline-block" data-tooltip-id={id}>
+  <slot />
+  
+  <div 
+    id={id}
+    class={`tooltip absolute z-50 ${positionClasses[position]} ${sizeClasses[size]} ${colorClasses[color]} rounded shadow-lg opacity-0 invisible transition-all duration-200 pointer-events-none`}
+    role="tooltip"
+  >
+    {content}
+    {arrow && (
+      <div class={`absolute w-0 h-0 border-4 ${arrowClasses[position]}`}></div>
+    )}
+  </div>
+</div>
+
+<script>
+  // 工具提示逻辑
+  document.addEventListener('DOMContentLoaded', () => {
+    // 获取所有工具提示容器
+    const tooltipContainers = document.querySelectorAll('.tooltip-container');
+    
+    tooltipContainers.forEach(container => {
+      const tooltipId = container.getAttribute('data-tooltip-id');
+      const tooltip = document.getElementById(tooltipId);
+      
+      if (!tooltip) return;
+      
+      // 获取配置
+      const position = tooltip.getAttribute('data-position') || 'top';
+      const trigger = tooltip.getAttribute('data-trigger') || 'hover';
+      const delay = parseInt(tooltip.getAttribute('data-delay') || '0');
+      
+      let timeoutId = null;
+      
+      // 显示工具提示
+      function showTooltip() {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        
+        timeoutId = setTimeout(() => {
+          tooltip.classList.remove('opacity-0', 'invisible');
+          tooltip.classList.add('opacity-100', 'visible');
+        }, delay);
+      }
+      
+      // 隐藏工具提示
+      function hideTooltip() {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        
+        tooltip.classList.add('opacity-0', 'invisible');
+        tooltip.classList.remove('opacity-100', 'visible');
+      }
+      
+      // 根据触发类型添加事件监听
+      if (trigger === 'hover') {
+        container.addEventListener('mouseenter', showTooltip);
+        container.addEventListener('mouseleave', hideTooltip);
+      } else if (trigger === 'click') {
+        container.addEventListener('click', (e) => {
+          e.stopPropagation();
+          
+          if (tooltip.classList.contains('opacity-0')) {
+            // 关闭其他工具提示
+            document.querySelectorAll('.tooltip').forEach(t => {
+              if (t !== tooltip) {
+                t.classList.add('opacity-0', 'invisible');
+                t.classList.remove('opacity-100', 'visible');
+              }
+            });
+            
+            showTooltip();
+          } else {
+            hideTooltip();
+          }
+        });
+        
+        // 点击其他地方关闭工具提示
+        document.addEventListener('click', (e) => {
+          if (!container.contains(e.target)) {
+            hideTooltip();
+          }
+        });
+      } else if (trigger === 'focus') {
+        const focusableElement = container.querySelector('button, input, select, textarea, a, [tabindex]');
+        
+        if (focusableElement) {
+          focusableElement.addEventListener('focus', showTooltip);
+          focusableElement.addEventListener('blur', hideTooltip);
+        }
+      }
+    });
+    
+    // 点击文档关闭所有点击触发的工具提示
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.tooltip').forEach(tooltip => {
+        const container = document.querySelector(`[data-tooltip-id="${tooltip.id}"]`);
+        const trigger = container?.getAttribute('data-trigger') || 'hover';
+        
+        if (trigger === 'click') {
+          tooltip.classList.add('opacity-0', 'invisible');
+          tooltip.classList.remove('opacity-100', 'visible');
+        }
+      });
+    });
+  });
+</script>
