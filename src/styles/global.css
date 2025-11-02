@@ -1,0 +1,271 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 全局变量 */
+:root {
+  --color-bg: 255 255 255;
+  --color-text: 17 24 39;
+  --color-text-secondary: 75 85 99;
+  --color-border: 229 231 235;
+  --color-card-bg: 255 255 255;
+  --color-card-border: 229 231 235;
+  --color-primary: 59 130 246;
+  --color-primary-hover: 37 99 235;
+  --color-code-bg: 243 244 246;
+  --color-code-text: 17 24 39;
+  --color-quote-bg: 243 244 246;
+  --color-quote-text: 75 85 99;
+}
+
+/* 深色主题变量 */
+[data-theme="dark"] {
+  --color-bg: 17 24 39;
+  --color-text: 243 244 246;
+  --color-text-secondary: 156 163 175;
+  --color-border: 55 65 81;
+  --color-card-bg: 31 41 55;
+  --color-card-border: 55 65 81;
+  --color-primary: 96 165 250;
+  --color-primary-hover: 59 130 246;
+  --color-code-bg: 31 41 55;
+  --color-code-text: 243 244 246;
+  --color-quote-bg: 31 41 55;
+  --color-quote-text: 156 163 175;
+}
+
+/* 基础样式 */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-gray-900 transition-colors duration-300;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  [data-theme="dark"] body {
+    @apply bg-gray-900 text-gray-100;
+  }
+
+  /* 标题样式 */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold text-gray-900 dark:text-gray-100;
+    line-height: 1.25;
+  }
+
+  h1 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl;
+  }
+
+  h4 {
+    @apply text-lg md:text-xl;
+  }
+
+  /* 段落样式 */
+  p {
+    @apply text-gray-700 dark:text-gray-300 leading-relaxed;
+  }
+
+  /* 链接样式 */
+  a {
+    @apply text-primary-600 dark:text-primary-400 font-medium hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-200;
+  }
+
+  /* 列表样式 */
+  ul, ol {
+    @apply pl-6 my-4;
+  }
+
+  li {
+    @apply mb-2;
+  }
+
+  /* 引用样式 */
+  blockquote {
+    @apply border-l-4 border-primary-500 pl-4 py-2 my-4 bg-gray-50 dark:bg-gray-800 italic text-gray-700 dark:text-gray-300;
+  }
+
+  /* 代码样式 */
+  code {
+    @apply text-sm px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200;
+  }
+
+  pre {
+    @apply rounded-lg overflow-x-auto my-6;
+  }
+
+  pre code {
+    @apply block p-4 text-sm bg-transparent;
+  }
+
+  /* 表格样式 */
+  table {
+    @apply w-full border-collapse my-6;
+  }
+
+  th, td {
+    @apply border border-gray-200 dark:border-gray-700 px-4 py-2 text-left;
+  }
+
+  th {
+    @apply bg-gray-50 dark:bg-gray-800 font-semibold;
+  }
+
+  /* 分隔线样式 */
+  hr {
+    @apply border-0 border-t border-gray-200 dark:border-gray-700 my-8;
+  }
+}
+
+/* 组件样式 */
+@layer components {
+  /* 卡片样式 */
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+
+  /* 按钮样式 */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600;
+  }
+
+  .btn-ghost {
+    @apply text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:ring-gray-500 dark:text-gray-300 dark:hover:text-gray-100 dark:hover:bg-gray-700;
+  }
+
+  /* 输入框样式 */
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100;
+  }
+
+  /* 标签样式 */
+  .tag {
+    @apply inline-block px-2.5 py-0.5 text-xs font-medium rounded-full bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200;
+  }
+
+  /* 导航样式 */
+  .nav-link {
+    @apply text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+  }
+
+  .nav-link-active {
+    @apply text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20;
+  }
+}
+
+/* 工具类 */
+@layer utilities {
+  /* 文本选择样式 */
+  .selection {
+    @apply bg-primary-100 text-primary-900 dark:bg-primary-900 dark:text-primary-100;
+  }
+
+  ::selection {
+    @apply selection;
+  }
+
+  /* 滚动条样式 */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(156 163 175) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(156 163 175);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(107 114 128);
+  }
+
+  /* 深色主题滚动条 */
+  [data-theme="dark"] .scrollbar-thin {
+    scrollbar-color: rgb(75 85 99) transparent;
+  }
+
+  [data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(75 85 99);
+  }
+
+  [data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(107 114 128);
+  }
+
+  /* 动画类 */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  /* 响应式容器 */
+  .container {
+    @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* 阅读宽度 */
+  .prose {
+    @apply max-w-none;
+  }
+
+  .prose p {
+    @apply my-4;
+  }
+
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    @apply mt-8 mb-4 first:mt-0;
+  }
+
+  .prose h1 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  .prose h2 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  .prose h3 {
+    @apply text-xl md:text-2xl;
+  }
+
+  .prose h4 {
+    @apply text-lg md:text-xl;
+  }
+}

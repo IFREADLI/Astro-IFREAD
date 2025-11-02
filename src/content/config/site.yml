@@ -1,0 +1,25 @@
+---
+site:
+  title: "极简博客"
+  description: "一个专注于内容与阅读体验的极简风格博客"
+  author: "博主姓名"
+  email: "author@example.com"
+  url: "https://minimal-blog.example.com"
+  logo: "/logo.svg"
+  favicon: "/favicon.svg"
+
+social:
+  - name: "GitHub"
+    url: "https://github.com/username"
+    icon: "github"
+  - name: "Twitter"
+    url: "https://twitter.com/username"
+    icon: "twitter"
+  - name: "RSS"
+    url: "/rss.xml"
+    icon: "rss"
+
+analytics:
+  googleAnalyticsId: "G-XXXXXXXXXX"
+  plausibleDomain: "minimal-blog.example.com"
+---

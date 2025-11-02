@@ -1,0 +1,27 @@
+---
+name: "技术"
+description: "技术相关的文章，包括编程、开发工具等"
+color: "#3b82f6"
+icon: "code"
+---
+
+---
+name: "设计"
+description: "设计相关的文章，包括UI/UX、平面设计等"
+color: "#8b5cf6"
+icon: "palette"
+---
+
+---
+name: "生活"
+description: "生活随笔、旅行记录等"
+color: "#10b981"
+icon: "heart"
+---
+
+---
+name: "思考"
+description: "个人思考、观点分享等"
+color: "#f59e0b"
+icon: "lightbulb"
+---

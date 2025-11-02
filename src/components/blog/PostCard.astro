@@ -1,0 +1,103 @@
+---
+import { getCollection } from 'astro:content';
+import { formatReadingTime } from '../utils/content';
+import { formatDate } from '../utils/content';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+
+const { title, description, pubDate, updatedDate, category, tags, featuredImage, readingTime } = post.data;
+
+const formattedDate = formatDate(pubDate);
+const formattedReadingTime = formatReadingTime(readingTime);
+---
+
+<article class="group relative bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-200 dark:border-gray-700">
+  <!-- 封面图片 -->
+  {featuredImage && (
+    <a href={`/blog/${post.slug}/`} class="block aspect-video overflow-hidden">
+      <img
+        src={featuredImage.src}
+        alt={featuredImage.alt || title}
+        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        loading="lazy"
+      />
+    </a>
+  )}
+  
+  <!-- 文章内容 -->
+  <div class="p-6">
+    <!-- 分类和日期 -->
+    <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2 space-x-4">
+      {category && (
+        <a href={`/categories/${category}/`} class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+          {category}
+        </a>
+      )}
+      <time datetime={pubDate.toISOString()}>{formattedDate}</time>
+      {updatedDate && (
+        <span>• 更新于 {formatDate(updatedDate)}</span>
+      )}
+      <span>• {formattedReadingTime}</span>
+    </div>
+    
+    <!-- 标题 -->
+    <h2 class="text-xl font-bold mb-2 line-clamp-2">
+      <a href={`/blog/${post.slug}/`} class="text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+        {title}
+      </a>
+    </h2>
+    
+    <!-- 描述 -->
+    {description && (
+      <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+        {description}
+      </p>
+    )}
+    
+    <!-- 标签 -->
+    {tags && tags.length > 0 && (
+      <div class="flex flex-wrap gap-2 mb-4">
+        {tags.map((tag) => (
+          <a
+            href={`/tags/${tag}/`}
+            class="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+          >
+            #{tag}
+          </a>
+        ))}
+      </div>
+    )}
+    
+    <!-- 阅读更多 -->
+    <a
+      href={`/blog/${post.slug}/`}
+      class="inline-flex items-center text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+    >
+      阅读更多
+      <svg class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </a>
+  </div>
+</article>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
