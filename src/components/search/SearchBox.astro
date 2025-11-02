@@ -179,4 +179,51 @@ const {
   });
 </script>
 
-<!-- Style removed for troubleshooting -->
+<style>
+  .search-box {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .search-input {
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .search-input:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  }
+
+  .search-suggestions {
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+  }
+
+  .search-suggestion-item {
+    transition: background-color 0.2s ease;
+  }
+
+  .search-suggestion-item:hover,
+  .search-suggestion-item:focus {
+    background-color: #f3f4f6;
+  }
+
+  /* 深色模式适配 */
+  :global(.dark) .search-input:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+  }
+
+  :global(.dark) .search-suggestion-item:hover,
+  :global(.dark) .search-suggestion-item:focus {
+    background-color: #374151;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 640px) {
+    .search-box {
+      max-width: 100%;
+    }
+  }
+</style>

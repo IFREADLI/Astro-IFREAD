@@ -240,4 +240,139 @@ const formattedReadingTime = formatReadingTime(readingTime);
   });
 </script>
 
-<!-- Style removed for troubleshooting -->
+<style>
+  /* 文章内容排版优化 */
+  .prose {
+    font-size: 1.125rem;
+    line-height: 1.75;
+  }
+
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  .prose h1 {
+    font-size: 2.25rem;
+    line-height: 1.1;
+  }
+
+  .prose h2 {
+    font-size: 1.875rem;
+    line-height: 1.2;
+  }
+
+  .prose h3 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+
+  .prose p {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .prose ul, .prose ol {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .prose li {
+    margin-bottom: 0.5rem;
+  }
+
+  .prose a {
+    color: #3b82f6;
+    text-decoration: none;
+    border-bottom: 1px dashed #3b82f6;
+  }
+
+  .prose a:hover {
+    color: #2563eb;
+    border-bottom-style: solid;
+  }
+
+  .prose img {
+    border-radius: 0.5rem;
+  }
+
+  .prose blockquote {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+    border-left: 4px solid #e5e7eb;
+    color: #6b7280;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .prose a {
+      color: #60a5fa;
+    }
+
+    .prose a:hover {
+      color: #93c5fd;
+    }
+
+    .prose blockquote {
+      border-left-color: #4b5563;
+      color: #9ca3af;
+    }
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .prose {
+      font-size: 1rem;
+    }
+
+    .prose h1 {
+      font-size: 1.875rem;
+    }
+
+    .prose h2 {
+      font-size: 1.5rem;
+    }
+
+    .prose h3 {
+      font-size: 1.25rem;
+    }
+  }
+
+  /* 分享按钮悬停效果 */
+  .flex.space-x-4 a:hover,
+  .flex.space-x-4 button:hover {
+    transform: translateY(-2px);
+  }
+
+  /* 导航链接样式 */
+  nav a {
+    transition: all 0.2s ease;
+  }
+
+  /* 代码块样式 */
+  .prose pre {
+    border-radius: 0.5rem;
+    overflow-x: auto;
+  }
+
+  /* 表格样式 */
+  .prose table {
+    width: 100%;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    border-collapse: collapse;
+  }
+
+  .prose th, .prose td {
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .prose th, .prose td {
+      border-color: #4b5563;
+    }
+  }
+</style>
