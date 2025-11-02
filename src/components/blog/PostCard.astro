@@ -13,8 +13,12 @@ const { post } = Astro.props;
 const { title, description, pubDate, updatedDate, category, tags, featuredImage, readingTime } = post.data;
 
 // 获取分类配置
-const categoriesConfig = await import('../../content/config/index.yml');
-const categoryData = category ? categoriesConfig.default[category] : null;
+const categoriesCollection = await getCollection('categories');
+const categoriesConfig = categoriesCollection.reduce((acc, cat) => {
+  acc[cat.id] = cat.data;
+  return acc;
+}, {});
+const categoryData = category ? categoriesConfig[category] : null;
 
 const formattedDate = formatDate(pubDate);
 const formattedReadingTime = formatReadingTime(readingTime);
@@ -112,18 +116,4 @@ const formattedReadingTime = formatReadingTime(readingTime);
   </div>
 </article>
 
-<style>
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-</style>
+<!-- Style removed for troubleshooting -->

@@ -1,7 +1,5 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Header from '../layouts/Header.astro';
-import Footer from '../layouts/Footer.astro';
+import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 
@@ -45,8 +43,6 @@ function getTagColor(tagName: string) {
 ---
 
 <Layout title="标签 - 极简博客">
-  <Header />
-  
   <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <!-- 页面标题 -->
     <header class="mb-8">
@@ -115,6 +111,4 @@ function getTagColor(tagName: string) {
       </section>
     )}
   </main>
-  
-  <Footer />
 </Layout>

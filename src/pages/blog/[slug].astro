@@ -33,7 +33,7 @@ const { prev, next } = getAdjacentPosts(post, allPosts);
 const content = await post.render();
 const headings = extractHeadings(content.html);
 
-// 准备SEO数据
+// 准备SEO数据，添加日期字段的空值检查
 const seoData = {
   title: post.data.title,
   description: post.data.description,
@@ -41,8 +41,8 @@ const seoData = {
   type: 'BlogPosting',
   keywords: post.data.tags,
   author: post.data.author,
-  publishedTime: post.data.publishDate.toISOString(),
-  modifiedTime: post.data.updatedDate?.toISOString() || post.data.publishDate.toISOString(),
+  publishedTime: post.data.publishDate?.toISOString() || new Date().toISOString(),
+  modifiedTime: post.data.updatedDate?.toISOString() || post.data.publishDate?.toISOString() || new Date().toISOString(),
   articleSection: post.data.category,
   tags: post.data.tags,
   noIndex: post.data.draft,

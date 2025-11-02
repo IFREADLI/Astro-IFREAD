@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import { formatReadingTime } from '../../utils/content';
 import { formatDate } from '../../utils/content';
 import { processMedia } from '../../utils/media';
+import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import OptimizedImage from '../media/OptimizedImage.astro';
 import CodeBlock from '../media/CodeBlock.astro';
@@ -24,8 +25,12 @@ const { Content, html } = await post.render();
 const processedHtml = processMedia(html);
 
 // 获取分类配置
-const categoriesConfig = await import('../../content/config/index.yml');
-const categoryData = category ? categoriesConfig.default[category] : null;
+const categoriesCollection = await getCollection('categories');
+const categoriesConfig = categoriesCollection.reduce((acc, cat) => {
+  acc[cat.id] = cat.data;
+  return acc;
+}, {});
+const categoryData = category ? categoriesConfig[category] : null;
 
 const formattedDate = formatDate(pubDate);
 const formattedReadingTime = formatReadingTime(readingTime);
@@ -235,69 +240,4 @@ const formattedReadingTime = formatReadingTime(readingTime);
   });
 </script>
 
-<style>
-  /* 文章内容样式 */
-  .prose {
-    @apply text-gray-800 dark:text-gray-200;
-  }
-  
-  .prose h1 {
-    @apply text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-white;
-  }
-  
-  .prose h2 {
-    @apply text-2xl font-bold mt-8 mb-4 text-gray-900 dark:text-white;
-  }
-  
-  .prose h3 {
-    @apply text-xl font-bold mt-6 mb-3 text-gray-900 dark:text-white;
-  }
-  
-  .prose p {
-    @apply mb-4 leading-7;
-  }
-  
-  .prose a {
-    @apply text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 underline transition-colors;
-  }
-  
-  .prose ul, .prose ol {
-    @apply mb-4 pl-6;
-  }
-  
-  .prose li {
-    @apply mb-2;
-  }
-  
-  .prose blockquote {
-    @apply border-l-4 border-primary-500 pl-4 italic text-gray-700 dark:text-gray-300 mb-4;
-  }
-  
-  .prose code {
-    @apply bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-1 py-0.5 rounded text-sm;
-  }
-  
-  .prose pre {
-    @apply bg-gray-100 dark:bg-gray-800 rounded-lg p-4 overflow-x-auto mb-4;
-  }
-  
-  .prose pre code {
-    @apply bg-transparent p-0;
-  }
-  
-  .prose img {
-    @apply rounded-lg shadow-md my-6;
-  }
-  
-  .prose table {
-    @apply w-full border-collapse border border-gray-300 dark:border-gray-600 mb-4;
-  }
-  
-  .prose th, .prose td {
-    @apply border border-gray-300 dark:border-gray-600 px-4 py-2 text-left;
-  }
-  
-  .prose th {
-    @apply bg-gray-100 dark:bg-gray-800 font-medium;
-  }
-</style>
+<!-- Style removed for troubleshooting -->

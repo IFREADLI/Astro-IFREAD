@@ -1,9 +1,7 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Header from '../layouts/Header.astro';
-import Footer from '../layouts/Footer.astro';
+import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
-import PostCard from '../components/blog/PostCard.astro';
+import PostCard from '../../components/blog/PostCard.astro';
 import type { CollectionEntry } from 'astro:content';
 
 // 获取所有已发布的文章，按发布日期降序排列
@@ -24,8 +22,6 @@ const tags = [...new Set(posts.flatMap(post => post.data.tags || []))];
 ---
 
 <Layout title="所有文章 - 极简博客">
-  <Header />
-  
   <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <!-- 页面标题 -->
     <header class="mb-8">
@@ -86,6 +82,4 @@ const tags = [...new Set(posts.flatMap(post => post.data.tags || []))];
       )}
     </section>
   </main>
-  
-  <Footer />
 </Layout>

@@ -5,19 +5,25 @@ import Footer from '../../layouts/Footer.astro';
 import { getCollection } from 'astro:content';
 import PostCard from '../../components/blog/PostCard.astro';
 import type { CollectionEntry } from 'astro:content';
+import { SITE } from '../../utils/config';
+import SEO from '../../components/seo/SEO.astro';
 
-// 获取分类配置
-const categoriesConfig = await import('../../content/config/index.yml');
-
-// 获取分类slug
-const { category } = Astro.params;
-
-// 检查分类是否存在
-if (!categoriesConfig.default[category]) {
-  return Astro.redirect('/404');
+// 导出getStaticPaths函数以支持动态路由
+export async function getStaticPaths() {
+  const categories = await getCollection('categories');
+  
+  return categories.map((category) => ({
+    params: { category: category.id },
+    props: { categoryConfig: category.data }
+  }));
 }
 
-const categoryData = categoriesConfig.default[category];
+// 从props获取分类配置和参数
+const { categoryConfig } = Astro.props;
+const { category } = Astro.params;
+
+// 使用props中的分类配置
+const categoryData = categoryConfig;
 
 // 获取该分类下的所有文章
 const posts = await getCollection('blog', ({ data }) => {
@@ -30,9 +36,8 @@ const sortedPosts = posts.sort((a, b) =>
 );
 
 // 获取相关分类（排除当前分类）
-const relatedCategories = Object.entries(categoriesConfig.default)
-  .filter(([slug]) => slug !== category)
-  .slice(0, 3);
+const relatedCategories = [];
+// 暂时留空，后续可以实现获取相关分类的逻辑
 ---
 
 <Layout title={`${categoryData.name} - 分类 - 极简博客`}>

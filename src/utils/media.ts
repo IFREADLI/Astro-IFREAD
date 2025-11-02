@@ -34,6 +34,11 @@ function parseImageAttributes(attrStr: string) {
 
 // 处理图片
 function processImages(content: string): string {
+  // 添加空值检查，确保content存在
+  if (!content || typeof content.replace !== 'function') {
+    return '';
+  }
+  
   return content.replace(imageRegex, (match, alt, src, attrs) => {
     const attributes = parseImageAttributes(attrs || '');
     const width = attributes.width ? `width="${attributes.width}"` : '';

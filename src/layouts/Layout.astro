@@ -40,8 +40,15 @@ const {
 } = Astro.props;
 
 // 获取站点配置
-const { data: siteConfig } = await getCollection('config', ({ id }) => id === 'site');
-const site = siteConfig.site;
+let site = SITE;
+try {
+  const configs = await getCollection('config', ({ id }) => id === 'site');
+  if (configs && configs.length > 0 && configs[0].data && configs[0].data.site) {
+    site = configs[0].data.site;
+  }
+} catch (error) {
+  console.warn('Failed to load site config, using default site settings');
+}
 
 // 构建完整URL
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
