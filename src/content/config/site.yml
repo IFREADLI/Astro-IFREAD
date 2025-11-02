@@ -1,4 +1,3 @@
----
 site:
   title: "极简博客"
   description: "一个专注于内容与阅读体验的极简风格博客"
@@ -16,10 +15,9 @@ social:
     url: "https://twitter.com/username"
     icon: "twitter"
   - name: "RSS"
-    url: "/rss.xml"
+    url: "https://minimal-blog.example.com/rss.xml"
     icon: "rss"
 
 analytics:
   googleAnalyticsId: "G-XXXXXXXXXX"
   plausibleDomain: "minimal-blog.example.com"
----
