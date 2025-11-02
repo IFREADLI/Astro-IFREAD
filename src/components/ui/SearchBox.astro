@@ -299,3 +299,52 @@ const variantClasses = {
     });
   });
 </script>
+
+<style>
+  .search-container {
+    container-type: inline-size;
+  }
+
+  .suggestions {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .suggestions::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .suggestions::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  .suggestions::-webkit-scrollbar-thumb {
+    background: #c5c5c5;
+    border-radius: 3px;
+  }
+
+  .suggestions::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .suggestions::-webkit-scrollbar-track {
+      background: #2d3748;
+    }
+
+    .suggestions::-webkit-scrollbar-thumb {
+      background: #4a5568;
+    }
+
+    .suggestions::-webkit-scrollbar-thumb:hover {
+      background: #718096;
+    }
+  }
+
+  /* 响应式调整 */
+  @container (max-width: 640px) {
+    .suggestions {
+      max-height: 200px;
+    }
+  }
+</style>

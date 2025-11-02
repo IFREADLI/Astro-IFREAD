@@ -127,4 +127,31 @@ const { results, query, totalPosts } = Astro.props;
   )}
 </div>
 
-<!-- Style removed for troubleshooting -->
+<style>
+  .search-results {
+    container-type: inline-size;
+  }
+
+  .search-suggestion-item {
+    transition: background-color 0.2s ease;
+  }
+
+  .search-suggestion-item:hover,
+  .search-suggestion-item.focus {
+    background-color: #f3f4f6;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .search-suggestion-item:hover,
+    .search-suggestion-item.focus {
+      background-color: #374151;
+    }
+  }
+
+  /* 响应式调整 */
+  @container (max-width: 640px) {
+    .search-result-card {
+      padding: 1rem;
+    }
+  }
+</style>

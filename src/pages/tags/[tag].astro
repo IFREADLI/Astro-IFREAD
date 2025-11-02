@@ -6,9 +6,36 @@ import { getCollection } from 'astro:content';
 import PostCard from '../../components/blog/PostCard.astro';
 import type { CollectionEntry } from 'astro:content';
 
-// 获取标签名称
+// 导出getStaticPaths函数以支持动态路由
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => {
+    return !data.draft;
+  });
+  
+  // 收集所有唯一标签，并处理包含特殊字符的标签
+  const tagsMap = new Map<string, string>(); // 存储原始标签和URL安全标签的映射
+  
+  posts.forEach(post => {
+    if (post.data.tags && Array.isArray(post.data.tags)) {
+      post.data.tags.forEach(tag => {
+        // 替换标签中的斜杠为下划线，避免URL路径冲突
+        const safeTag = tag.replace(/\//g, '_');
+        tagsMap.set(safeTag, tag);
+      });
+    }
+  });
+  
+  // 为每个安全标签创建静态路径
+  return Array.from(tagsMap.keys()).map(safeTag => ({
+    params: { tag: safeTag },
+    props: { originalTag: tagsMap.get(safeTag) }
+  }));
+}
+
+// 获取标签名称，使用props中的原始标签
+const { originalTag } = Astro.props;
 const { tag } = Astro.params;
-const tagName = decodeURIComponent(tag);
+const tagName = originalTag || decodeURIComponent(tag);
 
 // 获取所有文章
 const allPosts = await getCollection('blog', ({ data }) => {
