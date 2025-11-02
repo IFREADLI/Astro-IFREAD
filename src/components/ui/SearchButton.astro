@@ -110,7 +110,7 @@
       searchResults.innerHTML = '<div class="p-4 text-center text-gray-500 dark:text-gray-400">搜索中...</div>';
       
       // 调用搜索API
-      fetch(`/api/search?q=${encodeURIComponent(query)}&limit=5`)
+      fetch(`/api/search/search?q=${encodeURIComponent(query)}&limit=5`)
         .then(response => {
           if (!response.ok) {
             throw new Error('搜索请求失败');

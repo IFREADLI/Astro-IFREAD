@@ -9,14 +9,21 @@ import CodeBlock from '../media/CodeBlock.astro';
 import VideoPlayer from '../media/VideoPlayer.astro';
 import AudioPlayer from '../media/AudioPlayer.astro';
 import Gallery from '../media/Gallery.astro';
+import ReadingMode from '../ui/ReadingMode.astro';
+import FontSizeAdjuster from '../ui/FontSizeAdjuster.astro';
+import Bookmark from '../ui/Bookmark.astro';
+import Comments from '../ui/Comments.astro';
 
 interface Props {
   post: CollectionEntry<'blog'>;
+  prev?: CollectionEntry<'blog'>;
+  next?: CollectionEntry<'blog'>;
+  readingTime?: number;
 }
 
-const { post } = Astro.props;
+const { post, prev, next, readingTime } = Astro.props;
 
-const { title, description, pubDate, updatedDate, category, tags, featuredImage, readingTime } = post.data;
+const { title, description, pubDate, updatedDate, category, tags, featuredImage } = post.data;
 
 const { Content, html } = await post.render();
 
@@ -180,36 +187,46 @@ const formattedReadingTime = formatReadingTime(readingTime);
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
         </svg>
       </button>
+      <ReadingMode />
+      <FontSizeAdjuster />
+      <Bookmark />
     </div>
   </div>
   
   <!-- 上一篇/下一篇导航 -->
   <nav class="flex justify-between items-center">
-    <!-- 这里需要根据实际文章数据来生成上一篇/下一篇链接 -->
-    <!-- 暂时使用占位符 -->
     <div class="flex-1">
-      {false && (
-        <a href="#" class="inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-          <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          上一篇
+      {prev && (
+        <a href={`/blog/${prev.slug}/`} class="inline-flex flex-col items-start text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors group">
+          <span class="text-xs text-gray-500 dark:text-gray-500 mb-1">上一篇</span>
+          <span class="flex items-center">
+            <svg class="w-4 h-4 mr-1 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            {prev.data.title}
+          </span>
         </a>
       )}
     </div>
     
     <div class="flex-1 text-right">
-      {false && (
-        <a href="#" class="inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-          下一篇
-          <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
+      {next && (
+        <a href={`/blog/${next.slug}/`} class="inline-flex flex-col items-end text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors group">
+          <span class="text-xs text-gray-500 dark:text-gray-500 mb-1">下一篇</span>
+          <span class="flex items-center">
+            {next.data.title}
+            <svg class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </span>
         </a>
       )}
     </div>
   </nav>
 </footer>
+
+<!-- 评论区 -->
+<Comments />
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {

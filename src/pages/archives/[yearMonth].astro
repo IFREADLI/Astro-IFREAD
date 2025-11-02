@@ -1,0 +1,270 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Header from '../../../layouts/Header.astro';
+import Footer from '../../../layouts/Footer.astro';
+import { getCollection } from 'astro:content';
+import PostCard from '../../../components/blog/PostCard.astro';
+import type { CollectionEntry } from 'astro:content';
+
+// 导出getStaticPaths函数以支持动态路由
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => {
+    return !data.draft;
+  });
+  
+  // 收集所有年月组合
+  const yearMonths = new Set<string>();
+  
+  posts.forEach(post => {
+    const date = new Date(post.data.publishDate);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 月份从0开始，需要+1
+    const yearMonth = `${year}-${month}`;
+    yearMonths.add(yearMonth);
+  });
+  
+  // 为每个年月创建静态路径
+  return Array.from(yearMonths).map(yearMonth => {
+    const [year, month] = yearMonth.split('-');
+    return {
+      params: { yearMonth },
+      props: { year: parseInt(year), month: parseInt(month) }
+    };
+  });
+}
+
+// 获取年月参数
+const { yearMonth } = Astro.params;
+const { year, month } = Astro.props;
+
+// 获取月份名称
+function getMonthName(month: number) {
+  const monthNames = [
+    '一月', '二月', '三月', '四月', '五月', '六月',
+    '七月', '八月', '九月', '十月', '十一月', '十二月'
+  ];
+  return monthNames[month - 1];
+}
+
+// 获取该月份的所有文章
+const allPosts = await getCollection('blog', ({ data }) => {
+  return !data.draft;
+});
+
+// 筛选该月份的文章
+const posts = allPosts.filter(post => {
+  const postDate = new Date(post.data.publishDate);
+  const postYear = postDate.getFullYear();
+  const postMonth = postDate.getMonth() + 1; // 月份从0开始，需要+1
+  return postYear === year && postMonth === month;
+});
+
+// 按日期排序
+const sortedPosts = posts.sort((a, b) => 
+  new Date(b.data.publishDate).valueOf() - new Date(a.data.publishDate).valueOf()
+);
+
+// 获取前后月份
+function getAdjacentMonths(currentYear: number, currentMonth: number) {
+  const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+  const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+  
+  const nextMonth = currentMonth === 12 ? 1 : currentMonth + 1;
+  const nextYear = currentMonth === 12 ? currentYear + 1 : currentYear;
+  
+  return {
+    prev: {
+      year: prevYear,
+      month: prevMonth,
+      yearMonth: `${prevYear}-${prevMonth.toString().padStart(2, '0')}`
+    },
+    next: {
+      year: nextYear,
+      month: nextMonth,
+      yearMonth: `${nextYear}-${nextMonth.toString().padStart(2, '0')}`
+    }
+  };
+}
+
+const { prev, next } = getAdjacentMonths(year, month);
+
+// 检查前后月份是否有文章
+async function hasPostsInMonth(year: number, month: number) {
+  const posts = await getCollection('blog', ({ data }) => {
+    return !data.draft;
+  });
+  
+  return posts.some(post => {
+    const postDate = new Date(post.data.publishDate);
+    const postYear = postDate.getFullYear();
+    const postMonth = postDate.getMonth() + 1;
+    return postYear === year && postMonth === month;
+  });
+}
+
+const hasPrevPosts = await hasPostsInMonth(prev.year, prev.month);
+const hasNextPosts = await hasPostsInMonth(next.year, next.month);
+---
+
+<Layout title={`${year}年${getMonthName(month)} - 归档 - 极简博客`}>
+  <Header />
+  
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- 月份头部信息 -->
+    <header class="mb-10">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 mr-4">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+              {year}年{getMonthName(month)}
+            </h1>
+            <p class="text-gray-600 dark:text-gray-300 mt-1">
+              {sortedPosts.length} 篇文章
+            </p>
+          </div>
+        </div>
+        
+        <!-- 月份导航 -->
+        <div class="flex items-center space-x-2">
+          {hasPrevPosts ? (
+            <a 
+              href={`/archives/${prev.yearMonth}/`}
+              class="p-2 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              title={`${prev.year}年${getMonthName(prev.month)}`}
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </a>
+          ) : (
+            <div class="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </div>
+          )}
+          
+          <a 
+            href="/archives/"
+            class="p-2 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            title="归档首页"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          </a>
+          
+          {hasNextPosts ? (
+            <a 
+              href={`/archives/${next.yearMonth}/`}
+              class="p-2 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              title={`${next.year}年${getMonthName(next.month)}`}
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          ) : (
+            <div class="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
+    
+    <!-- 文章列表 -->
+    <section class="mb-12">
+      {sortedPosts.length > 0 ? (
+        <div class="space-y-6">
+          {sortedPosts.map((post) => (
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+              <div class="flex items-start justify-between mb-3">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+                  <a href={`/blog/${post.slug}/`} class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                    {post.data.title}
+                  </a>
+                </h2>
+                {post.data.readingTime && (
+                  <div class="ml-4 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                    {post.data.readingTime} 分钟阅读
+                  </div>
+                )}
+              </div>
+              
+              <div class="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
+                <time datetime={post.data.publishDate}>
+                  {new Date(post.data.publishDate).toLocaleDateString('zh-CN', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </time>
+                
+                {post.data.category && (
+                  <>
+                    <span class="mx-2">·</span>
+                    <a href={`/categories/${post.data.category}/`} class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                      {post.data.category}
+                    </a>
+                  </>
+                )}
+                
+                {post.data.tags && post.data.tags.length > 0 && (
+                  <>
+                    <span class="mx-2">·</span>
+                    <div class="flex flex-wrap gap-1">
+                      {post.data.tags.map(tag => (
+                        <a 
+                          href={`/tags/${encodeURIComponent(tag)}/`}
+                          class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded hover:bg-primary-100 dark:hover:bg-primary-900 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+                        >
+                          #{tag}
+                        </a>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+              
+              {post.data.description && (
+                <p class="text-gray-700 dark:text-gray-300 mb-4">
+                  {post.data.description}
+                </p>
+              )}
+              
+              <div class="flex items-center justify-between">
+                <a 
+                  href={`/blog/${post.slug}/`}
+                  class="inline-flex items-center text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+                >
+                  阅读全文
+                  <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">暂无文章</h3>
+          <p class="text-gray-600 dark:text-gray-400">该月份还没有发布任何文章</p>
+        </div>
+      )}
+    </section>
+  </main>
+  
+  <Footer />
+</Layout>

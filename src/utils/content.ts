@@ -1,6 +1,19 @@
 // 内容处理工具函数
 
 /**
+ * 将字符串转换为URL友好的slug
+ */
+export function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\u4e00-\u9fa5\s-]/g, '') // 保留中文、英文、数字、空格和连字符
+    .replace(/\s+/g, '-') // 空格替换为连字符
+    .replace(/-+/g, '-') // 多个连字符合并为一个
+    .replace(/^-|-$/g, ''); // 移除开头和结尾的连字符
+}
+
+/**
  * 格式化日期
  */
 export function formatDate(date: Date): string {

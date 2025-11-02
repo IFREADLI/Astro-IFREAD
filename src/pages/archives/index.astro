@@ -1,0 +1,244 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../layouts/Header.astro';
+import Footer from '../../layouts/Footer.astro';
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+// 获取所有文章
+const posts = await getCollection('blog', ({ data }) => {
+  return !data.draft;
+});
+
+// 按年份分组文章
+function groupPostsByYear(posts: CollectionEntry<'blog'>[]) {
+  const postsByYear = new Map<number, CollectionEntry<'blog'>[]>();
+  
+  posts.forEach(post => {
+    const year = new Date(post.data.publishDate).getFullYear();
+    if (!postsByYear.has(year)) {
+      postsByYear.set(year, []);
+    }
+    postsByYear.get(year)!.push(post);
+  });
+  
+  // 按年份降序排序
+  return Array.from(postsByYear.entries())
+    .sort((a, b) => b[0] - a[0]);
+}
+
+// 按月份分组文章
+function groupPostsByMonth(posts: CollectionEntry<'blog'>[]) {
+  const postsByMonth = new Map<string, CollectionEntry<'blog'>[]>();
+  
+  posts.forEach(post => {
+    const date = new Date(post.data.publishDate);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // 月份从0开始，需要+1
+    const monthKey = `${year}-${month.toString().padStart(2, '0')}`;
+    
+    if (!postsByMonth.has(monthKey)) {
+      postsByMonth.set(monthKey, []);
+    }
+    postsByMonth.get(monthKey)!.push(post);
+  });
+  
+  // 按月份降序排序
+  return Array.from(postsByMonth.entries())
+    .sort((a, b) => b[0].localeCompare(a[0]));
+}
+
+// 获取月份名称
+function getMonthName(month: string) {
+  const monthNum = parseInt(month.split('-')[1]);
+  const monthNames = [
+    '一月', '二月', '三月', '四月', '五月', '六月',
+    '七月', '八月', '九月', '十月', '十一月', '十二月'
+  ];
+  return monthNames[monthNum - 1];
+}
+
+// 获取年份统计
+const yearStats = groupPostsByYear(posts);
+const monthStats = groupPostsByMonth(posts);
+
+// 计算总字数
+const totalWords = posts.reduce((total, post) => {
+  // 简单估算：假设每篇文章平均1000字
+  // 实际项目中可以从文章内容中计算
+  return total + (post.data.readingTime ? post.data.readingTime * 200 : 1000);
+}, 0);
+
+// 获取最早和最新文章日期
+const dates = posts.map(post => new Date(post.data.publishDate));
+const earliestDate = dates.length > 0 ? new Date(Math.min(...dates.map(d => d.getTime()))) : null;
+const latestDate = dates.length > 0 ? new Date(Math.max(...dates.map(d => d.getTime()))) : null;
+---
+
+<Layout title="归档 - 极简博客">
+  <Header />
+  
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- 页面标题 -->
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+        文章归档
+      </h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300">
+        按时间浏览所有文章
+      </p>
+    </header>
+    
+    <!-- 统计信息 -->
+    <section class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-8">
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">统计信息</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-900 dark:text-white">{posts.length}</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">总文章数</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-900 dark:text-white">{yearStats.length}</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">活跃年份</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-900 dark:text-white">{Math.round(totalWords / 1000)}k</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">总字数</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-900 dark:text-white">
+            {posts.length > 0 ? Math.round(totalWords / posts.length) : 0}
+          </div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">平均字数</div>
+        </div>
+      </div>
+      
+      {earliestDate && latestDate && (
+        <div class="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
+          <span>从 {earliestDate.getFullYear()}年{earliestDate.getMonth() + 1}月 </span>
+          <span>到 {latestDate.getFullYear()}年{latestDate.getMonth() + 1}月</span>
+        </div>
+      )}
+    </section>
+    
+    <!-- 按年份归档 -->
+    <section class="mb-8">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">按年份归档</h2>
+      {yearStats.length > 0 ? (
+        <div class="space-y-8">
+          {yearStats.map(([year, yearPosts]) => (
+            <div>
+              <div class="flex items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{year}年</h3>
+                <span class="ml-3 text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                  {yearPosts.length} 篇
+                </span>
+              </div>
+              
+              <div class="ml-4 border-l-2 border-gray-200 dark:border-gray-700 pl-6 space-y-4">
+                {yearPosts
+                  .sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime())
+                  .map(post => (
+                  <div class="relative">
+                    <div class="absolute -left-8 top-2 w-3 h-3 bg-primary-500 rounded-full"></div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                          <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-1">
+                            <a href={`/blog/${post.slug}/`} class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                              {post.data.title}
+                            </a>
+                          </h4>
+                          <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            {new Date(post.data.publishDate).toLocaleDateString('zh-CN', { 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            })}
+                          </p>
+                          {post.data.description && (
+                            <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
+                              {post.data.description}
+                            </p>
+                          )}
+                        </div>
+                        {post.data.readingTime && (
+                          <div class="ml-4 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                            {post.data.readingTime} 分钟阅读
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">暂无文章</h3>
+          <p class="text-gray-600 dark:text-gray-400">还没有发布任何文章，敬请期待！</p>
+        </div>
+      )}
+    </section>
+    
+    <!-- 按月份归档 -->
+    <section>
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">按月份归档</h2>
+      {monthStats.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {monthStats.map(([month, monthPosts]) => (
+            <a 
+              href={`/archives/${month}/`}
+              class="block bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                  {month.split('-')[0]}年 {getMonthName(month)}
+                </h3>
+                <span class="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                  {monthPosts.length} 篇
+                </span>
+              </div>
+              <div class="text-sm text-gray-600 dark:text-gray-400">
+                {monthPosts.slice(0, 3).map(post => (
+                  <div key={post.slug} class="truncate mb-1">
+                    {post.data.title}
+                  </div>
+                ))}
+                {monthPosts.length > 3 && (
+                  <div class="text-xs text-gray-500 dark:text-gray-500">
+                    还有 {monthPosts.length - 3} 篇...
+                  </div>
+                )}
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">暂无归档</h3>
+          <p class="text-gray-600 dark:text-gray-400">还没有发布任何文章，敬请期待！</p>
+        </div>
+      )}
+    </section>
+  </main>
+  
+  <Footer />
+</Layout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

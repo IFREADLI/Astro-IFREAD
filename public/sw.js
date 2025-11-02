@@ -1,18 +1,17 @@
 // Service Worker for caching and offline support
-const CACHE_NAME = 'ifread-blog-v1';
-const STATIC_CACHE = 'ifread-static-v1';
-const CONTENT_CACHE = 'ifread-content-v1';
+const CACHE_NAME = 'ifread-blog-v3';
+const STATIC_CACHE = 'ifread-static-v3';
+const CONTENT_CACHE = 'ifread-content-v3';
 
 // 需要缓存的静态资源
 const STATIC_ASSETS = [
   '/',
   '/styles/global.css',
-  '/fonts/inter-var.woff2',
   '/logo.svg',
   '/favicon.svg',
-  '/favicon-16x16.png',
-  '/favicon-32x32.png',
-  '/apple-touch-icon.png'
+  '/favicon-16x16.svg',
+  '/favicon-32x32.svg',
+  '/apple-touch-icon.svg'
 ];
 
 // 安装事件 - 缓存静态资源
@@ -160,8 +159,8 @@ self.addEventListener('push', (event) => {
     
     const options = {
       body: data.body,
-      icon: '/icon-192x192.png',
-      badge: '/badge-72x72.png',
+      icon: '/icon-192x192.png.svg',
+      badge: '/badge-72x72.png.svg',
       vibrate: [100, 50, 100],
       data: {
         dateOfArrival: Date.now(),

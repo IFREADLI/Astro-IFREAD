@@ -1,0 +1,325 @@
+---
+// 字体大小调整组件
+---
+
+<div class="font-size-adjuster" id="font-size-adjuster">
+  <button
+    class="font-size-button"
+    aria-label="调整字体大小"
+    title="调整字体大小"
+  >
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+    </svg>
+    <span class="ml-2">字体大小</span>
+  </button>
+  
+  <div class="font-size-menu" id="font-size-menu">
+    <div class="font-size-controls">
+      <div class="font-size-label">字体大小</div>
+      <div class="font-size-buttons">
+        <button class="font-size-btn decrease" aria-label="减小字体">A-</button>
+        <span class="font-size-value" id="font-size-value">100%</span>
+        <button class="font-size-btn increase" aria-label="增大字体">A+</button>
+      </div>
+      <div class="font-size-presets">
+        <button class="preset-btn" data-size="85">小</button>
+        <button class="preset-btn active" data-size="100">标准</button>
+        <button class="preset-btn" data-size="115">大</button>
+        <button class="preset-btn" data-size="130">特大</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const fontSizeAdjuster = document.getElementById('font-size-adjuster');
+    const fontSizeButton = fontSizeAdjuster.querySelector('.font-size-button');
+    const fontSizeMenu = document.getElementById('font-size-menu');
+    const decreaseBtn = fontSizeMenu.querySelector('.decrease');
+    const increaseBtn = fontSizeMenu.querySelector('.increase');
+    const fontSizeValue = document.getElementById('font-size-value');
+    const presetButtons = fontSizeMenu.querySelectorAll('.preset-btn');
+    
+    // 从本地存储获取字体大小设置
+    let currentFontSize = parseInt(localStorage.getItem('fontSize') || '100');
+    
+    // 应用字体大小
+    function applyFontSize(size) {
+      // 限制字体大小范围
+      size = Math.max(70, Math.min(150, size));
+      currentFontSize = size;
+      
+      // 保存到本地存储
+      localStorage.setItem('fontSize', size.toString());
+      
+      // 更新显示值
+      fontSizeValue.textContent = `${size}%`;
+      
+      // 更新预设按钮状态
+      presetButtons.forEach(btn => {
+        const btnSize = parseInt(btn.dataset.size);
+        if (btnSize === size) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      
+      // 应用到文章内容
+      const articleContent = document.querySelector('.prose, main, .content');
+      if (articleContent) {
+        articleContent.style.fontSize = `${size}%`;
+      }
+      
+      // 应用到阅读模式内容
+      const readingModeContent = document.querySelector('.reading-mode-content');
+      if (readingModeContent) {
+        readingModeContent.style.fontSize = `${Math.max(16, 18 * size / 100)}px`;
+      }
+      
+      // 触发自定义事件
+      window.dispatchEvent(new CustomEvent('fontsizechange', {
+        detail: { fontSize: size }
+      }));
+    }
+    
+    // 初始化字体大小
+    applyFontSize(currentFontSize);
+    
+    // 切换菜单显示
+    function toggleMenu() {
+      fontSizeMenu.classList.toggle('show');
+    }
+    
+    // 关闭菜单
+    function closeMenu() {
+      fontSizeMenu.classList.remove('show');
+    }
+    
+    // 增大字体
+    function increaseFontSize() {
+      applyFontSize(currentFontSize + 5);
+    }
+    
+    // 减小字体
+    function decreaseFontSize() {
+      applyFontSize(currentFontSize - 5);
+    }
+    
+    // 设置预设字体大小
+    function setPresetSize(e) {
+      const size = parseInt(e.target.dataset.size);
+      applyFontSize(size);
+    }
+    
+    // 绑定事件
+    fontSizeButton.addEventListener('click', toggleMenu);
+    decreaseBtn.addEventListener('click', decreaseFontSize);
+    increaseBtn.addEventListener('click', increaseFontSize);
+    presetButtons.forEach(btn => btn.addEventListener('click', setPresetSize));
+    
+    // 点击外部关闭菜单
+    document.addEventListener('click', (e) => {
+      if (!fontSizeAdjuster.contains(e.target)) {
+        closeMenu();
+      }
+    });
+    
+    // 监听阅读模式变化
+    window.addEventListener('readingmodechange', (e) => {
+      if (e.detail.isActive) {
+        // 进入阅读模式时应用当前字体大小
+        const readingModeContent = document.querySelector('.reading-mode-content');
+        if (readingModeContent) {
+          readingModeContent.style.fontSize = `${Math.max(16, 18 * currentFontSize / 100)}px`;
+        }
+      }
+    });
+  });
+</script>
+
+<style>
+  .font-size-adjuster {
+    position: relative;
+  }
+
+  .font-size-button {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    color: #6b7280;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .font-size-button:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .font-size-button {
+      border-color: #4b5563;
+      color: #9ca3af;
+    }
+
+    .font-size-button:hover {
+      background-color: #374151;
+      border-color: #6b7280;
+      color: #e5e7eb;
+    }
+  }
+
+  .font-size-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    z-index: 50;
+    width: 220px;
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: all 0.2s ease;
+  }
+
+  .font-size-menu.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .font-size-menu {
+      background-color: #1f2937;
+      border-color: #4b5563;
+    }
+  }
+
+  .font-size-controls {
+    padding: 16px;
+  }
+
+  .font-size-label {
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: #111827;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .font-size-label {
+      color: #f9fafb;
+    }
+  }
+
+  .font-size-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .font-size-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    border: 1px solid #d1d5db;
+    background-color: white;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .font-size-btn:hover {
+    background-color: #f3f4f6;
+  }
+
+  .font-size-btn:active {
+    transform: scale(0.95);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .font-size-btn {
+      border-color: #4b5563;
+      background-color: #374151;
+      color: #e5e7eb;
+    }
+
+    .font-size-btn:hover {
+      background-color: #4b5563;
+    }
+  }
+
+  .font-size-value {
+    font-weight: 500;
+    color: #374151;
+    min-width: 40px;
+    text-align: center;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .font-size-value {
+      color: #e5e7eb;
+    }
+  }
+
+  .font-size-presets {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .preset-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid #d1d5db;
+    background-color: white;
+    color: #6b7280;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .preset-btn:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+  }
+
+  .preset-btn.active {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .preset-btn {
+      border-color: #4b5563;
+      background-color: #374151;
+      color: #9ca3af;
+    }
+
+    .preset-btn:hover {
+      background-color: #4b5563;
+      color: #e5e7eb;
+    }
+
+    .preset-btn.active {
+      background-color: #3b82f6;
+      border-color: #3b82f6;
+      color: white;
+    }
+  }
+</style>

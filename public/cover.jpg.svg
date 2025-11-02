@@ -1,0 +1,6 @@
+<!-- 这是一个占位符图片，实际使用时请替换为真实的封面图片 -->
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#3b82f6"/>
+  <text x="600" y="300" font-family="Inter, sans-serif" font-size="48" font-weight="700" text-anchor="middle" fill="white">IFREAD blog</text>
+  <text x="600" y="360" font-family="Inter, sans-serif" font-size="24" text-anchor="middle" fill="white">一个专注于内容与阅读体验的极简风格博客</text>
+</svg>

@@ -14,7 +14,7 @@ export const SITE = {
   url: 'https://minimal-blog.example.com',
   logo: '/logo.svg',
   favicon: '/favicon.svg',
-  image: '/og-image.jpg',
+  image: '/cover.svg',
   locale: 'zh-CN',
   type: 'website',
   social: [
@@ -84,6 +84,10 @@ export const NAVIGATION = [
     href: '/tags',
   },
   {
+    name: '归档',
+    href: '/archives',
+  },
+  {
     name: '关于',
     href: '/about',
   },
@@ -97,6 +101,7 @@ export const FOOTER_LINKS = [
       { name: '所有文章', href: '/blog' },
       { name: '分类', href: '/categories' },
       { name: '标签', href: '/tags' },
+      { name: '归档', href: '/archives' },
     ],
   },
   {

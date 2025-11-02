@@ -3,23 +3,87 @@ import Layout from '../../layouts/Layout.astro';
 import Header from '../../layouts/Header.astro';
 import Footer from '../../layouts/Footer.astro';
 import { getCollection } from 'astro:content';
+import { slugify } from '../../utils/content';
 
 // 获取所有文章
 const posts = await getCollection('blog', ({ data }) => {
   return !data.draft;
 });
+
+// 获取所有分类
+const categories = await getCollection('categories');
+
+// 统计每个分类的文章数量
+const categoryCounts = new Map();
+
+// 首先初始化所有分类
+categories.forEach(category => {
+  categoryCounts.set(category.data.name, {
+    count: 0,
+    description: category.data.description,
+    slug: category.slug
+  });
+});
+
+// 统计文章分类
+posts.forEach(post => {
+  if (post.data.category) {
+    const categoryName = post.data.category;
+    if (categoryCounts.has(categoryName)) {
+      categoryCounts.get(categoryName).count++;
+    } else {
+      // 如果分类不存在于categories集合中，创建一个新分类
+      categoryCounts.set(categoryName, {
+        count: 1,
+        description: '',
+        slug: slugify(categoryName)
+      });
+    }
+  }
+});
+
+// 转换为数组并按文章数量排序
+const sortedCategories = Array.from(categoryCounts.entries())
+  .filter(([_, data]) => data.count > 0) // 只显示有文章的分类
+  .sort((a, b) => b[1].count - a[1].count);
 ---
 
 <Layout title="分类 - 极简博客">
   <Header />
   
   <main class="max-w-4xl mx-auto px-4 py-12">
-    <h1 class="text-3xl font-bold text-center mb-8">文章分类</h1>
-    
-    <div class="text-center">
-      <p>共有 {posts.length} 篇文章</p>
+    <div class="text-center mb-12">
+      <h1 class="text-3xl font-bold mb-4">文章分类</h1>
+      <p class="text-gray-600 dark:text-gray-400">共有 {posts.length} 篇文章，分布在 {sortedCategories.length} 个分类中</p>
     </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {sortedCategories.map(([name, data]) => (
+        <a href={`/categories/${data.slug}/`} class="category-card block p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-200 dark:border-gray-700">
+          <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">{name}</h2>
+          <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm">{data.description || '暂无描述'}</p>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-500 dark:text-gray-500">{data.count} 篇文章</span>
+            <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </a>
+      ))}
+    </div>
+    
+    {sortedCategories.length === 0 && (
+      <div class="text-center py-12">
+        <p class="text-gray-500 dark:text-gray-400">暂无分类</p>
+      </div>
+    )}
   </main>
   
   <Footer />
 </Layout>
+
+<style>
+  .category-card:hover {
+    transform: translateY(-2px);
+  }
+</style>

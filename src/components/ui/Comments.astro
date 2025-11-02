@@ -1,0 +1,188 @@
+---
+// GitHub Discussions 评论组件
+---
+interface Props {
+  repo?: string;
+  categoryId?: string;
+  term?: string;
+}
+
+const { 
+  repo = "github-repo-name/repo-name", 
+  categoryId = "DIC_kwDOF123456", 
+  term = "" 
+} = Astro.props;
+
+// 使用文章标题作为讨论标题
+const discussionTitle = term || "文章讨论";
+---
+
+<div class="comments-section" id="comments">
+  <div class="comments-container">
+    <h3 class="comments-title">评论</h3>
+    <div class="comments-utterances">
+      <div class="comments-loading">
+        <div class="spinner"></div>
+        <p>加载评论中...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const commentsContainer = document.querySelector('.comments-utterances');
+    const commentsLoading = document.querySelector('.comments-loading');
+    
+    // 配置Utterances
+    const utterancesConfig = {
+      repo: '{repo}',
+      issueTerm: '{term}',
+      label: 'comment',
+      theme: 'github-light',
+      issueNumber: '',
+      categoryId: '{categoryId}'
+    };
+    
+    // 根据当前主题设置Utterances主题
+    function updateUtterancesTheme() {
+      const currentTheme = window.getCurrentTheme ? window.getCurrentTheme() : 'light';
+      utterancesConfig.theme = currentTheme === 'dark' ? 'github-dark' : 'github-light';
+      
+      // 如果Utterances已经加载，更新主题
+      const utterancesIframe = document.querySelector('.utterances-frame');
+      if (utterancesIframe) {
+        const message = {
+          type: 'set-theme',
+          theme: utterancesConfig.theme
+        };
+        utterancesIframe.contentWindow.postMessage(message, 'https://utteranc.es');
+      }
+    }
+    
+    // 初始化Utterances
+    function initUtterances() {
+      // 创建script元素
+      const script = document.createElement('script');
+      script.src = 'https://utteranc.es/client.js';
+      script.setAttribute('repo', utterancesConfig.repo);
+      script.setAttribute('issue-term', utterancesConfig.issueTerm);
+      script.setAttribute('label', utterancesConfig.label);
+      script.setAttribute('theme', utterancesConfig.theme);
+      script.setAttribute('crossorigin', 'anonymous');
+      script.async = true;
+      
+      // 监听主题变化
+      script.addEventListener('load', () => {
+        // 隐藏加载提示
+        if (commentsLoading) {
+          commentsLoading.style.display = 'none';
+        }
+        
+        // 监听主题变化事件
+        window.addEventListener('themechange', updateUtterancesTheme);
+      });
+      
+      // 添加到容器
+      commentsContainer.appendChild(script);
+    }
+    
+    // 延迟加载评论，提高页面性能
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          initUtterances();
+          observer.disconnect();
+        }
+      });
+    }, {
+      rootMargin: '200px'
+    });
+    
+    observer.observe(commentsContainer);
+  });
+</script>
+
+<style>
+  .comments-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .comments-section {
+      border-top-color: #4b5563;
+    }
+  }
+
+  .comments-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .comments-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #111827;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .comments-title {
+      color: #f9fafb;
+    }
+  }
+
+  .comments-utterances {
+    min-height: 200px;
+  }
+
+  .comments-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: #6b7280;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .comments-loading {
+      color: #9ca3af;
+    }
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .spinner {
+      border-color: #4b5563;
+      border-top-color: #60a5fa;
+    }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Utterances自定义样式 */
+  .utterances {
+    max-width: 100%;
+  }
+
+  .utterances-frame {
+    width: 100%;
+    min-height: 200px;
+    border: none;
+  }
+</style>

@@ -1,0 +1,227 @@
+---
+// 书签组件
+---
+
+<div class="bookmark-toggle" id="bookmark-toggle">
+  <button
+    class="bookmark-button"
+    aria-label="添加书签"
+    title="添加书签"
+  >
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+    </svg>
+    <span class="ml-2">书签</span>
+  </button>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const bookmarkToggle = document.getElementById('bookmark-toggle');
+    const bookmarkButton = bookmarkToggle.querySelector('.bookmark-button');
+    
+    // 获取当前文章URL作为书签ID
+    const articleUrl = window.location.pathname;
+    const bookmarkId = `bookmark-${articleUrl}`;
+    
+    // 从本地存储获取书签状态
+    let isBookmarked = localStorage.getItem(bookmarkId) === 'true';
+    
+    // 更新书签按钮状态
+    function updateBookmarkButton() {
+      if (isBookmarked) {
+        bookmarkButton.classList.add('bookmarked');
+        bookmarkButton.setAttribute('aria-label', '移除书签');
+        bookmarkButton.setAttribute('title', '移除书签');
+        
+        // 更新SVG为实心图标
+        bookmarkButton.querySelector('svg').innerHTML = 
+          '<path fill-rule="evenodd" d="M5 2a2 2 0 00-2 2v16l7-3.5 7 3.5V4a2 2 0 00-2-2H5zm2.854 5.146a.5.5 0 10-.708-.708L7 7.086 5.854 5.94a.5.5 0 10-.708.708l1.5 1.5a.5.5 0 00.708 0l3-3z" clip-rule="evenodd" />';
+      } else {
+        bookmarkButton.classList.remove('bookmarked');
+        bookmarkButton.setAttribute('aria-label', '添加书签');
+        bookmarkButton.setAttribute('title', '添加书签');
+        
+        // 更新SVG为空心图标
+        bookmarkButton.querySelector('svg').innerHTML = 
+          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />';
+      }
+    }
+    
+    // 初始化书签按钮状态
+    updateBookmarkButton();
+    
+    // 切换书签状态
+    function toggleBookmark() {
+      isBookmarked = !isBookmarked;
+      
+      // 保存到本地存储
+      localStorage.setItem(bookmarkId, isBookmarked.toString());
+      
+      // 如果添加书签，保存当前滚动位置
+      if (isBookmarked) {
+        const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+        localStorage.setItem(`${bookmarkId}-position`, scrollPosition.toString());
+        
+        // 保存文章标题（如果可用）
+        const articleTitle = document.querySelector('h1')?.textContent || '未命名文章';
+        localStorage.setItem(`${bookmarkId}-title`, articleTitle);
+        
+        // 保存当前时间
+        localStorage.setItem(`${bookmarkId}-date`, new Date().toISOString());
+        
+        // 显示添加成功提示
+        showNotification('书签已添加');
+      } else {
+        // 移除书签相关数据
+        localStorage.removeItem(`${bookmarkId}-position`);
+        localStorage.removeItem(`${bookmarkId}-title`);
+        localStorage.removeItem(`${bookmarkId}-date`);
+        
+        // 显示移除成功提示
+        showNotification('书签已移除');
+      }
+      
+      // 更新按钮状态
+      updateBookmarkButton();
+      
+      // 触发自定义事件
+      window.dispatchEvent(new CustomEvent('bookmarkchange', {
+        detail: { 
+          isBookmarked, 
+          articleUrl,
+          articleTitle: localStorage.getItem(`${bookmarkId}-title`)
+        }
+      }));
+    }
+    
+    // 显示通知
+    function showNotification(message) {
+      // 创建通知元素
+      const notification = document.createElement('div');
+      notification.className = 'bookmark-notification';
+      notification.textContent = message;
+      
+      // 添加样式
+      notification.style.position = 'fixed';
+      notification.style.bottom = '20px';
+      notification.style.left = '50%';
+      notification.style.transform = 'translateX(-50%)';
+      notification.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+      notification.style.color = 'white';
+      notification.style.padding = '8px 16px';
+      notification.style.borderRadius = '4px';
+      notification.style.zIndex = '1000';
+      notification.style.opacity = '0';
+      notification.style.transition = 'opacity 0.3s ease';
+      
+      // 添加到页面
+      document.body.appendChild(notification);
+      
+      // 显示动画
+      setTimeout(() => {
+        notification.style.opacity = '1';
+      }, 10);
+      
+      // 3秒后移除
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 3000);
+    }
+    
+    // 绑定事件
+    bookmarkButton.addEventListener('click', toggleBookmark);
+    
+    // 检查是否有保存的滚动位置，如果有则询问用户是否跳转
+    const savedPosition = localStorage.getItem(`${bookmarkId}-position`);
+    if (savedPosition && isBookmarked) {
+      // 延迟显示恢复位置提示，让用户先看到文章内容
+      setTimeout(() => {
+        const restorePosition = confirm('检测到您之前阅读过此文章，是否跳转到上次阅读位置？');
+        if (restorePosition) {
+          window.scrollTo({
+            top: parseInt(savedPosition),
+            behavior: 'smooth'
+          });
+        }
+      }, 1000);
+    }
+  });
+</script>
+
+<style>
+  .bookmark-toggle {
+    position: relative;
+  }
+
+  .bookmark-button {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    color: #6b7280;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .bookmark-button:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+  }
+
+  .bookmark-button.bookmarked {
+    background-color: #fef3c7;
+    border-color: #f59e0b;
+    color: #d97706;
+  }
+
+  .bookmark-button.bookmarked:hover {
+    background-color: #fde68a;
+    border-color: #d97706;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .bookmark-button {
+      border-color: #4b5563;
+      color: #9ca3af;
+    }
+
+    .bookmark-button:hover {
+      background-color: #374151;
+      border-color: #6b7280;
+      color: #e5e7eb;
+    }
+
+    .bookmark-button.bookmarked {
+      background-color: #451a03;
+      border-color: #d97706;
+      color: #fbbf24;
+    }
+
+    .bookmark-button.bookmarked:hover {
+      background-color: #78350f;
+      border-color: #f59e0b;
+    }
+  }
+
+  .bookmark-notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+</style>

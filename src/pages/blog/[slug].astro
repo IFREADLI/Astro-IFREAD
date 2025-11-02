@@ -4,7 +4,7 @@ import PostContent from '../../components/blog/PostContent.astro';
 import TableOfContents from '../../components/blog/TableOfContents.astro';
 import ReadingProgress from '../../components/blog/ReadingProgress.astro';
 import { getCollection } from 'astro:content';
-import { getAdjacentPosts, extractHeadings } from '../../utils/content';
+import { getAdjacentPosts, extractHeadings, calculateReadingTime } from '../../utils/content';
 import type { CollectionEntry } from 'astro:content';
 
 // 获取当前文章
@@ -33,6 +33,9 @@ const { prev, next } = getAdjacentPosts(post, allPosts);
 const content = await post.render();
 const headings = extractHeadings(content.html);
 
+// 计算阅读时间（如果文章没有提供）
+const readingTime = post.data.readingTime || calculateReadingTime(content.html);
+
 // 准备SEO数据，添加日期字段的空值检查
 const seoData = {
   title: post.data.title,
@@ -48,7 +51,7 @@ const seoData = {
   noIndex: post.data.draft,
   structuredData: {
     wordCount: post.data.wordCount,
-    readingTime: post.data.readingTime
+    readingTime: readingTime
   }
 };
 ---
@@ -60,7 +63,7 @@ const seoData = {
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
       <!-- 文章内容 -->
       <div class="lg:col-span-3">
-        <PostContent post={post} />
+        <PostContent post={post} prev={prev} next={next} readingTime={readingTime} />
       </div>
       
       <!-- 侧边栏 -->
