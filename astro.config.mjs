@@ -32,6 +32,17 @@ export default defineConfig({
       frames: {
         style: 'classic',
       },
+      // 启用语法高亮
+      styleOverrides: {
+        codeBackground: 'var(--code-bg)',
+        codeForeground: 'var(--code-text)',
+        borderColor: 'var(--border)',
+        activeLineBackground: 'var(--code-highlight-bg, rgba(255, 255, 0, 0.1))',
+      },
+      // 启用行内代码样式
+      inlineCode: {
+        style: 'punctuation-color',
+      },
     }),
     mdx(),
     tailwind({
