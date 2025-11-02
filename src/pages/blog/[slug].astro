@@ -1,0 +1,66 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../layouts/Header.astro';
+import Footer from '../../layouts/Footer.astro';
+import { getCollection } from 'astro:content';
+import PostContent from '../../components/blog/PostContent.astro';
+import TableOfContents from '../../components/blog/TableOfContents.astro';
+import ReadingProgress from '../../components/blog/ReadingProgress.astro';
+import { getAdjacentPosts, extractHeadings } from '../../utils/content';
+import type { CollectionEntry } from 'astro:content';
+
+// 获取当前文章
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => {
+    return !data.draft;
+  });
+  
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+
+// 获取所有文章用于上一篇/下一篇导航
+const allPosts = await getCollection('blog', ({ data }) => {
+  return !data.draft;
+});
+
+// 获取上一篇/下一篇文章
+const { prev, next } = getAdjacentPosts(post, allPosts);
+
+// 渲染文章内容
+const { Content } = await post.render();
+
+// 提取文章内容中的标题
+const content = await post.render();
+const headings = extractHeadings(content.html);
+---
+
+<Layout title={`${post.data.title} - 极简博客`} description={post.data.description}>
+  <ReadingProgress />
+  <Header />
+  
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- 文章内容 -->
+      <div class="lg:col-span-3">
+        <PostContent post={post} />
+      </div>
+      
+      <!-- 侧边栏 -->
+      <aside class="lg:col-span-1">
+        <!-- 目录 -->
+        {headings.length > 0 && (
+          <div class="sticky top-20">
+            <TableOfContents headings={headings} />
+          </div>
+        )}
+      </aside>
+    </div>
+  </main>
+  
+  <Footer />
+</Layout>

@@ -1,0 +1,91 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../layouts/Header.astro';
+import Footer from '../layouts/Footer.astro';
+import { getCollection } from 'astro:content';
+import PostCard from '../components/blog/PostCard.astro';
+import type { CollectionEntry } from 'astro:content';
+
+// 获取所有已发布的文章，按发布日期降序排列
+const posts = await getCollection('blog', ({ data }) => {
+  return !data.draft;
+});
+
+// 按发布日期降序排列
+const sortedPosts = posts.sort((a, b) => 
+  new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+);
+
+// 获取所有分类
+const categories = [...new Set(posts.map(post => post.data.category).filter(Boolean))];
+
+// 获取所有标签
+const tags = [...new Set(posts.flatMap(post => post.data.tags || []))];
+---
+
+<Layout title="所有文章 - 极简博客">
+  <Header />
+  
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- 页面标题 -->
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+        所有文章
+      </h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300">
+        共 {sortedPosts.length} 篇文章
+      </p>
+    </header>
+    
+    <!-- 分类和标签过滤 -->
+    <section class="mb-8">
+      <div class="flex flex-wrap gap-4 items-center">
+        <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+          <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          筛选：
+        </div>
+        
+        <!-- 分类筛选 -->
+        <div class="flex flex-wrap gap-2">
+          <a
+            href="/blog/"
+            class="px-3 py-1 text-sm font-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full transition-colors"
+          >
+            全部
+          </a>
+          {categories.map((category) => (
+            <a
+              href={`/blog/?category=${category}`}
+              class="px-3 py-1 text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+            >
+              {category}
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+    
+    <!-- 文章列表 -->
+    <section>
+      {sortedPosts.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {sortedPosts.map((post) => (
+            <PostCard post={post} />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">暂无文章</h3>
+          <p class="text-gray-600 dark:text-gray-400">还没有发布任何文章，敬请期待！</p>
+        </div>
+      )}
+    </section>
+  </main>
+  
+  <Footer />
+</Layout>
