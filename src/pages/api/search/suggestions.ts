@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
-import { getSearchSuggestions } from '../../utils/search';
+import { getSearchSuggestions } from '../../../utils/search';
 
 export const GET: APIRoute = async ({ url }) => {
   try {
