@@ -7,6 +7,7 @@ const blogCollection = defineCollection({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
+    publishDate: z.coerce.date().optional(), // 兼容性字段
     updatedDate: z.coerce.date().optional(),
     category: z.string(),
     subcategory: z.string().optional(),

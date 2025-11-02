@@ -2,6 +2,7 @@
 title: "极简主义设计原则"
 description: "探讨极简主义设计的核心原则，以及如何在网页设计中应用这些原则。"
 pubDate: 2024-01-05
+publishDate: 2024-01-05
 category: "设计"
 tags: ["设计", "极简主义", "UI/UX"]
 featured: false

@@ -1,0 +1,160 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../layouts/Header.astro';
+import Footer from '../../layouts/Footer.astro';
+import { getCollection } from 'astro:content';
+import PostCard from '../../components/blog/PostCard.astro';
+import type { CollectionEntry } from 'astro:content';
+
+// 获取分类配置
+const categoriesConfig = await import('../../content/config/index.yml');
+
+// 获取分类slug
+const { category } = Astro.params;
+
+// 检查分类是否存在
+if (!categoriesConfig.default[category]) {
+  return Astro.redirect('/404');
+}
+
+const categoryData = categoriesConfig.default[category];
+
+// 获取该分类下的所有文章
+const posts = await getCollection('blog', ({ data }) => {
+  return !data.draft && data.category === category;
+});
+
+// 按日期排序
+const sortedPosts = posts.sort((a, b) => 
+  new Date(b.data.publishDate).valueOf() - new Date(a.data.publishDate).valueOf()
+);
+
+// 获取相关分类（排除当前分类）
+const relatedCategories = Object.entries(categoriesConfig.default)
+  .filter(([slug]) => slug !== category)
+  .slice(0, 3);
+---
+
+<Layout title={`${categoryData.name} - 分类 - 极简博客`}>
+  <Header />
+  
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- 分类头部信息 -->
+    <header class="mb-10">
+      <div class="flex items-center mb-4">
+        <div 
+          class="w-12 h-12 rounded-full flex items-center justify-center text-white mr-4"
+          style={`background-color: ${categoryData.color || '#6366f1'}`}
+        >
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {categoryData.icon === 'code' && (
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            )}
+            {categoryData.icon === 'palette' && (
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            )}
+            {categoryData.icon === 'heart' && (
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            )}
+            {categoryData.icon === 'lightbulb' && (
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            )}
+            {!categoryData.icon && (
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            )}
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+            {categoryData.name}
+          </h1>
+          <p class="text-gray-600 dark:text-gray-300 mt-1">
+            {sortedPosts.length} 篇文章
+          </p>
+        </div>
+      </div>
+      
+      <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
+        {categoryData.description}
+      </p>
+    </header>
+    
+    <!-- 文章列表 -->
+    <section class="mb-12">
+      {sortedPosts.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {sortedPosts.map((post) => (
+            <PostCard post={post} />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">暂无文章</h3>
+          <p class="text-gray-600 dark:text-gray-400">该分类下还没有发布任何文章</p>
+        </div>
+      )}
+    </section>
+    
+    <!-- 相关分类 -->
+    {relatedCategories.length > 0 && (
+      <section class="mb-12">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">其他分类</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {relatedCategories.map(([slug, config]: [string, any]) => (
+            <a
+              href={`/categories/${slug}/`}
+              class="flex items-center p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+            >
+              <div 
+                class="w-8 h-8 rounded-full flex items-center justify-center text-white mr-3"
+                style={`background-color: ${config.color || '#6366f1'}`}
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {config.icon === 'code' && (
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                  )}
+                  {config.icon === 'palette' && (
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                  )}
+                  {config.icon === 'heart' && (
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  )}
+                  {config.icon === 'lightbulb' && (
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  )}
+                  {!config.icon && (
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  )}
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-medium text-gray-900 dark:text-white">{config.name}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {posts.filter(post => post.data.category === slug).length} 篇文章
+                </p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+    
+    <!-- 返回按钮 -->
+    <div class="text-center">
+      <a 
+        href="/categories/"
+        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+      >
+        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        返回分类列表
+      </a>
+    </div>
+  </main>
+  
+  <Footer />
+</Layout>

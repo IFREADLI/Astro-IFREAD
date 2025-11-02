@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
-import { formatReadingTime } from '../utils/content';
-import { formatDate } from '../utils/content';
+import { formatReadingTime } from '../../utils/content';
+import { formatDate } from '../../utils/content';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -11,6 +11,10 @@ interface Props {
 const { post } = Astro.props;
 
 const { title, description, pubDate, updatedDate, category, tags, featuredImage, readingTime } = post.data;
+
+// 获取分类配置
+const categoriesConfig = await import('../../content/config/index.yml');
+const categoryData = category ? categoriesConfig.default[category] : null;
 
 const formattedDate = formatDate(pubDate);
 const formattedReadingTime = formatReadingTime(readingTime);
@@ -33,9 +37,31 @@ const formattedReadingTime = formatReadingTime(readingTime);
   <div class="p-6">
     <!-- 分类和日期 -->
     <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2 space-x-4">
-      {category && (
-        <a href={`/categories/${category}/`} class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-          {category}
+      {category && categoryData && (
+        <a 
+          href={`/categories/${category}/`} 
+          class="inline-flex items-center hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+        >
+          {categoryData.icon && (
+            <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {categoryData.icon === 'code' && (
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              )}
+              {categoryData.icon === 'palette' && (
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+              )}
+              {categoryData.icon === 'heart' && (
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              )}
+              {categoryData.icon === 'lightbulb' && (
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              )}
+              {!categoryData.icon && (
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              )}
+            </svg>
+          )}
+          {categoryData.name || category}
         </a>
       )}
       <time datetime={pubDate.toISOString()}>{formattedDate}</time>
@@ -64,7 +90,7 @@ const formattedReadingTime = formatReadingTime(readingTime);
       <div class="flex flex-wrap gap-2 mb-4">
         {tags.map((tag) => (
           <a
-            href={`/tags/${tag}/`}
+            href={`/tags/${encodeURIComponent(tag)}/`}
             class="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
           >
             #{tag}

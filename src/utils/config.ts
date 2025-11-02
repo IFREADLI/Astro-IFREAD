@@ -45,8 +45,8 @@ export const NAVIGATION = [
     href: '/',
   },
   {
-    name: '文章',
-    href: '/posts',
+    name: '博客',
+    href: '/blog',
   },
   {
     name: '分类',
@@ -67,7 +67,7 @@ export const FOOTER_LINKS = [
   {
     title: '内容',
     links: [
-      { name: '所有文章', href: '/posts' },
+      { name: '所有文章', href: '/blog' },
       { name: '分类', href: '/categories' },
       { name: '标签', href: '/tags' },
     ],

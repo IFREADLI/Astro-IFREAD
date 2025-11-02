@@ -1,0 +1,79 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  decoding?: 'async' | 'sync' | 'auto';
+  priority?: boolean;
+  caption?: string;
+}
+
+const { 
+  src, 
+  alt, 
+  width, 
+  height, 
+  class: className = '', 
+  loading = 'lazy',
+  decoding = 'async',
+  priority = false,
+  caption
+} = Astro.props;
+
+// 如果是优先加载的图片，设置loading为eager
+const finalLoading = priority ? 'eager' : loading;
+---
+
+<figure class="image-container {className}">
+  <img
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    loading={finalLoading}
+    decoding={decoding}
+    class="w-full h-auto rounded-lg shadow-md"
+  />
+  {caption && (
+    <figcaption class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+      {caption}
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  .image-container {
+    margin: 1.5rem 0;
+  }
+  
+  .image-container img {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .image-container:hover img {
+    transform: scale(1.02);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* 图片加载状态 */
+  .image-container img {
+    opacity: 0;
+    animation: fadeIn 0.5s ease forwards;
+  }
+  
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+  
+  /* 响应式图片 */
+  @media (max-width: 768px) {
+    .image-container {
+      margin: 1rem 0;
+    }
+  }
+</style>

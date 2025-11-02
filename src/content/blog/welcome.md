@@ -2,9 +2,10 @@
 title: "欢迎来到极简博客"
 description: "这是一个示例文章，展示了极简博客的设计风格和功能特性。"
 pubDate: 2024-01-15
+publishDate: 2024-01-15
 updatedDate: 2024-01-16
 category: "技术"
-tags: ["Astro", "博客", "极简主义"]
+tags: ["Astro", "博客", "极简主义", "设计"]
 featured: true
 featuredImage:
   src: "./cover.jpg"

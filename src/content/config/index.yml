@@ -1,0 +1,24 @@
+# 分类配置
+tech:
+  name: "技术"
+  description: "编程、开发和技术相关文章"
+  color: "#3b82f6"
+  icon: "code"
+
+design:
+  name: "设计"
+  description: "UI/UX设计、视觉设计和创意相关文章"
+  color: "#8b5cf6"
+  icon: "palette"
+
+life:
+  name: "生活"
+  description: "个人生活、思考和感悟"
+  color: "#ec4899"
+  icon: "heart"
+
+thinking:
+  name: "思考"
+  description: "深度思考和观点分享"
+  color: "#f59e0b"
+  icon: "lightbulb"

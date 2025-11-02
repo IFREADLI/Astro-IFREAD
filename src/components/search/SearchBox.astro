@@ -1,0 +1,199 @@
+---
+interface Props {
+  initialQuery?: string;
+  placeholder?: string;
+  showSuggestions?: boolean;
+}
+
+const { 
+  initialQuery = '', 
+  placeholder = '搜索文章...', 
+  showSuggestions = true 
+} = Astro.props;
+---
+
+<div class="search-box" id="search-box">
+  <div class="relative">
+    <input
+      type="text"
+      id="search-input"
+      class="search-input w-full px-4 py-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+      placeholder={placeholder}
+      value={initialQuery}
+      autocomplete="off"
+    />
+    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+      <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+    </div>
+  </div>
+  
+  {showSuggestions && (
+    <div id="search-suggestions" class="search-suggestions absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg hidden">
+      <!-- 搜索建议将通过JavaScript动态插入 -->
+    </div>
+  )}
+</div>
+
+<script>
+  // 搜索建议功能
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    const suggestionsContainer = document.getElementById('search-suggestions');
+    let currentFocus = -1;
+    
+    // 获取搜索建议
+    async function getSuggestions(query: string): Promise<string[]> {
+      if (!query.trim()) return [];
+      
+      try {
+        // 调用API获取搜索建议
+        const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}&limit=5`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch suggestions');
+        }
+        
+        const data = await response.json();
+        return data.suggestions || [];
+      } catch (error) {
+        console.error('Error fetching search suggestions:', error);
+        return [];
+      }
+    }
+    
+    // 显示搜索建议
+    function showSuggestions(suggestions: string[]) {
+      if (!suggestionsContainer) return;
+      
+      // 清空现有建议
+      suggestionsContainer.innerHTML = '';
+      currentFocus = -1;
+      
+      if (suggestions.length === 0) {
+        suggestionsContainer.classList.add('hidden');
+        return;
+      }
+      
+      // 创建建议项
+      suggestions.forEach((suggestion, index) => {
+        const item = document.createElement('div');
+        item.className = 'search-suggestion-item px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700';
+        item.textContent = suggestion;
+        item.addEventListener('click', () => {
+          searchInput.value = suggestion;
+          submitSearch();
+        });
+        
+        // 键盘导航
+        item.addEventListener('mouseenter', () => {
+          currentFocus = index;
+          updateActiveSuggestion();
+        });
+        
+        suggestionsContainer.appendChild(item);
+      });
+      
+      suggestionsContainer.classList.remove('hidden');
+    }
+    
+    // 更新当前激活的建议项
+    function updateActiveSuggestion() {
+      const items = suggestionsContainer?.getElementsByClassName('search-suggestion-item');
+      if (!items) return;
+      
+      // 移除所有激活状态
+      Array.from(items).forEach(item => {
+        item.classList.remove('bg-gray-100', 'dark:bg-gray-700');
+      });
+      
+      // 添加当前激活状态
+      if (currentFocus >= 0 && currentFocus < items.length) {
+        items[currentFocus].classList.add('bg-gray-100', 'dark:bg-gray-700');
+      }
+    }
+    
+    // 提交搜索
+    function submitSearch() {
+      const query = searchInput.value.trim();
+      if (query) {
+        // 构建搜索URL
+        const url = new URL(window.location.href);
+        url.pathname = '/search';
+        url.searchParams.set('q', query);
+        
+        // 跳转到搜索页面
+        window.location.href = url.toString();
+      }
+    }
+    
+    // 输入事件处理
+    searchInput.addEventListener('input', async () => {
+      const query = searchInput.value.trim();
+      
+      if (query.length < 2) {
+        showSuggestions([]);
+        return;
+      }
+      
+      const suggestions = await getSuggestions(query);
+      showSuggestions(suggestions);
+    });
+    
+    // 键盘事件处理
+    searchInput.addEventListener('keydown', (e) => {
+      const items = suggestionsContainer?.getElementsByClassName('search-suggestion-item');
+      if (!items) return;
+      
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        currentFocus++;
+        if (currentFocus >= items.length) currentFocus = 0;
+        updateActiveSuggestion();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        currentFocus--;
+        if (currentFocus < 0) currentFocus = items.length - 1;
+        updateActiveSuggestion();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (currentFocus > -1 && items[currentFocus]) {
+          // 选择当前高亮的建议
+          (items[currentFocus] as HTMLElement).click();
+        } else {
+          // 执行搜索
+          submitSearch();
+        }
+      } else if (e.key === 'Escape') {
+        // 隐藏建议
+        showSuggestions([]);
+      }
+    });
+    
+    // 点击外部隐藏建议
+    document.addEventListener('click', (e) => {
+      if (!searchInput.contains(e.target as Node) && !suggestionsContainer.contains(e.target as Node)) {
+        showSuggestions([]);
+      }
+    });
+  });
+</script>
+
+<style>
+  .search-box {
+    position: relative;
+  }
+  
+  .search-suggestions {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .search-suggestion-item {
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .search-suggestion-item:last-child {
+    border-bottom: none;
+  }
+</style>

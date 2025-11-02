@@ -1,0 +1,120 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../layouts/Header.astro';
+import Footer from '../layouts/Footer.astro';
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+// 获取所有文章
+const posts = await getCollection('blog', ({ data }) => {
+  return !data.draft;
+});
+
+// 统计每个标签的文章数量
+const tagCounts = posts.reduce((acc, post) => {
+  const tags = post.data.tags || [];
+  tags.forEach(tag => {
+    if (tag) {
+      acc[tag] = (acc[tag] || 0) + 1;
+    }
+  });
+  return acc;
+}, {});
+
+// 转换为数组并按文章数量排序
+const tags = Object.entries(tagCounts)
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => b.count - a.count);
+
+// 生成标签颜色（基于标签名称的哈希值）
+function getTagColor(tagName: string) {
+  let hash = 0;
+  for (let i = 0; i < tagName.length; i++) {
+    hash = tagName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  const colors = [
+    '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
+    '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9',
+    '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
+    '#ec4899', '#f43f5e'
+  ];
+  
+  return colors[Math.abs(hash) % colors.length];
+}
+---
+
+<Layout title="标签 - 极简博客">
+  <Header />
+  
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- 页面标题 -->
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+        文章标签
+      </h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300">
+        按标签浏览所有文章
+      </p>
+    </header>
+    
+    <!-- 标签云 -->
+    <section class="mb-12">
+      {tags.length > 0 ? (
+        <div class="flex flex-wrap gap-3 justify-center">
+          {tags.map((tag) => (
+            <a
+              href={`/tags/${encodeURIComponent(tag.name)}/`}
+              class="group relative inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium text-white transition-all duration-200 hover:scale-105 hover:shadow-lg"
+              style={`background-color: ${getTagColor(tag.name)}`}
+            >
+              <span>{tag.name}</span>
+              <span class="ml-1.5 bg-white/20 px-1.5 py-0.5 rounded-full text-xs">
+                {tag.count}
+              </span>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">暂无标签</h3>
+          <p class="text-gray-600 dark:text-gray-400">还没有创建任何标签，敬请期待！</p>
+        </div>
+      )}
+    </section>
+    
+    <!-- 标签统计 -->
+    {tags.length > 0 && (
+      <section class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">标签统计</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-gray-900 dark:text-white">{tags.length}</div>
+            <div class="text-sm text-gray-600 dark:text-gray-400">总标签数</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-gray-900 dark:text-white">{tags[0]?.count || 0}</div>
+            <div class="text-sm text-gray-600 dark:text-gray-400">最多文章数</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-gray-900 dark:text-white">
+              {tags.filter(tag => tag.count === 1).length}
+            </div>
+            <div class="text-sm text-gray-600 dark:text-gray-400">单篇标签</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-gray-900 dark:text-white">
+              {tags.filter(tag => tag.count > 5).length}
+            </div>
+            <div class="text-sm text-gray-600 dark:text-gray-400">热门标签</div>
+          </div>
+        </div>
+      </section>
+    )}
+  </main>
+  
+  <Footer />
+</Layout>

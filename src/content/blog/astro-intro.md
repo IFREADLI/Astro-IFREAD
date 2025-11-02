@@ -2,6 +2,8 @@
 title: "Astro框架入门指南"
 description: "了解Astro框架的核心概念和基本用法，构建高性能的静态网站。"
 pubDate: 2024-01-10
+publishDate: 2024-01-10
+updatedDate: 2024-01-10
 category: "技术"
 tags: ["Astro", "前端", "静态网站"]
 featured: true

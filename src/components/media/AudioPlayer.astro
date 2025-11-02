@@ -1,0 +1,213 @@
+---
+interface Props {
+  src: string;
+  title?: string;
+  artist?: string;
+  cover?: string;
+  autoplay?: boolean;
+  controls?: boolean;
+  loop?: boolean;
+  class?: string;
+}
+
+const { 
+  src, 
+  title,
+  artist,
+  cover,
+  autoplay = false,
+  controls = true,
+  loop = false,
+  class: className = ''
+} = Astro.props;
+
+// 生成唯一ID
+const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<div class="audio-player {className}">
+  {cover && (
+    <div class="audio-cover">
+      <img src={cover} alt={title || '音频封面'} class="w-full h-full object-cover" />
+    </div>
+  )}
+  
+  <div class="audio-info">
+    {title && <div class="audio-title">{title}</div>}
+    {artist && <div class="audio-artist">{artist}</div>}
+  </div>
+  
+  <audio
+    id={audioId}
+    src={src}
+    autoplay={autoplay}
+    controls={controls}
+    loop={loop}
+    class="audio-controls"
+  >
+    您的浏览器不支持音频播放。
+  </audio>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 音频播放器增强功能
+    const audioPlayers = document.querySelectorAll('.audio-player');
+    
+    audioPlayers.forEach(player => {
+      const audio = player.querySelector('audio');
+      if (!audio) return;
+      
+      // 添加加载状态
+      audio.addEventListener('loadstart', () => {
+        player.classList.add('loading');
+      });
+      
+      audio.addEventListener('canplay', () => {
+        player.classList.remove('loading');
+        player.classList.add('loaded');
+      });
+      
+      // 添加错误处理
+      audio.addEventListener('error', () => {
+        player.classList.add('error');
+        console.error('音频加载错误:', audio.error);
+      });
+      
+      // 添加播放/暂停状态切换
+      audio.addEventListener('play', () => {
+        player.classList.add('playing');
+        player.classList.remove('paused');
+      });
+      
+      audio.addEventListener('pause', () => {
+        player.classList.remove('playing');
+        player.classList.add('paused');
+      });
+      
+      // 添加结束状态
+      audio.addEventListener('ended', () => {
+        player.classList.remove('playing');
+        player.classList.add('ended');
+      });
+    });
+  });
+</script>
+
+<style>
+  .audio-player {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  .audio-cover {
+    width: 80px;
+    height: 80px;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  
+  .audio-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .audio-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .audio-artist {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .audio-controls {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  
+  /* 音频加载状态 */
+  .audio-player.loading {
+    opacity: 0.7;
+  }
+  
+  .audio-player.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* 音频错误状态 */
+  .audio-player.error {
+    opacity: 0.5;
+    filter: grayscale(100%);
+  }
+  
+  /* 播放状态动画 */
+  .audio-player.playing .audio-cover {
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(var(--accent-rgb), 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0);
+    }
+  }
+  
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .audio-player {
+      margin: 1rem 0;
+      padding: 0.75rem;
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .audio-cover {
+      width: 120px;
+      height: 120px;
+    }
+    
+    .audio-info {
+      width: 100%;
+    }
+    
+    .audio-title {
+      font-size: 0.875rem;
+    }
+    
+    .audio-artist {
+      font-size: 0.75rem;
+    }
+  }
+</style>

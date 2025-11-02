@@ -97,7 +97,7 @@
       }
     });
     
-    // 搜索输入处理（这里只是示例，实际搜索逻辑需要根据搜索系统实现）
+    // 搜索输入处理
     searchInput.addEventListener('input', (e) => {
       const query = e.target.value.trim();
       
@@ -106,21 +106,45 @@
         return;
       }
       
-      // 这里应该调用实际的搜索API
-      // 暂时显示加载状态
+      // 显示加载状态
       searchResults.innerHTML = '<div class="p-4 text-center text-gray-500 dark:text-gray-400">搜索中...</div>';
       
-      // 模拟搜索结果
-      setTimeout(() => {
-        searchResults.innerHTML = `
-          <div class="p-2">
-            <div class="p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
-              <h3 class="font-medium text-gray-900 dark:text-white">搜索结果示例</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">这是搜索结果的描述...</p>
-            </div>
-          </div>
-        `;
-      }, 500);
+      // 调用搜索API
+      fetch(`/api/search?q=${encodeURIComponent(query)}&limit=5`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('搜索请求失败');
+          }
+          return response.json();
+        })
+        .then(data => {
+          displaySearchResults(data.results || []);
+        })
+        .catch(error => {
+          console.error('搜索错误:', error);
+          searchResults.innerHTML = '<div class="p-4 text-center text-red-500 dark:text-red-400">搜索出错，请稍后再试</div>';
+        });
     });
+    
+    // 显示搜索结果
+    function displaySearchResults(results) {
+      if (results.length === 0) {
+        searchResults.innerHTML = '<div class="p-4 text-center text-gray-500 dark:text-gray-400">没有找到相关文章</div>';
+        return;
+      }
+      
+      const resultsHTML = results.map(result => `
+        <a href="${result.url}" class="block p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+          <h3 class="font-medium text-gray-900 dark:text-white">${result.title}</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">${result.description}</p>
+          <div class="flex items-center mt-2 text-xs text-gray-500 dark:text-gray-500">
+            ${result.category ? `<span class="mr-3">${result.category}</span>` : ''}
+            <span>${new Date(result.publishDate).toLocaleDateString('zh-CN')}</span>
+          </div>
+        </a>
+      `).join('');
+      
+      searchResults.innerHTML = resultsHTML;
+    }
   });
 </script>

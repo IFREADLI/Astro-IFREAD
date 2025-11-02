@@ -1,9 +1,11 @@
 ---
 title: "数字时代的慢生活"
-description: "在快节奏的数字时代，如何寻找内心的平静，过上更有意义的生活。"
-pubDate: 2024-01-01
-category: "生活"
-tags: ["生活", "思考", "数字时代"]
+description: "在快节奏的数字时代，如何找回生活的平衡，拥抱慢生活的哲学。"
+pubDate: 2023-11-15
+publishDate: 2023-11-15
+updatedDate: 2023-11-15
+category: "life"
+tags: ["生活", "慢生活", "数字时代", "平衡"]
 featured: false
 draft: false
 ---

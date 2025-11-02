@@ -1,0 +1,171 @@
+---
+interface Props {
+  src: string;
+  poster?: string;
+  title?: string;
+  width?: number;
+  height?: number;
+  autoplay?: boolean;
+  controls?: boolean;
+  loop?: boolean;
+  muted?: boolean;
+  class?: string;
+}
+
+const { 
+  src, 
+  poster, 
+  title,
+  width,
+  height,
+  autoplay = false,
+  controls = true,
+  loop = false,
+  muted = false,
+  class: className = ''
+} = Astro.props;
+
+// 生成唯一ID
+const videoId = `video-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<div class="video-container {className}">
+  <video
+    id={videoId}
+    src={src}
+    poster={poster}
+    width={width}
+    height={height}
+    autoplay={autoplay}
+    controls={controls}
+    loop={loop}
+    muted={muted}
+    class="w-full rounded-lg shadow-md"
+    {title}
+  >
+    您的浏览器不支持视频播放。
+  </video>
+  
+  {title && (
+    <div class="video-title">
+      <h3>{title}</h3>
+    </div>
+  )}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 视频播放器增强功能
+    const videos = document.querySelectorAll('.video-container video');
+    
+    videos.forEach(video => {
+      // 添加加载状态
+      video.addEventListener('loadstart', () => {
+        video.classList.add('loading');
+      });
+      
+      video.addEventListener('canplay', () => {
+        video.classList.remove('loading');
+        video.classList.add('loaded');
+      });
+      
+      // 添加错误处理
+      video.addEventListener('error', () => {
+        video.classList.add('error');
+        console.error('视频加载错误:', video.error);
+      });
+      
+      // 添加播放/暂停状态切换
+      video.addEventListener('play', () => {
+        video.classList.add('playing');
+        video.classList.remove('paused');
+      });
+      
+      video.addEventListener('pause', () => {
+        video.classList.remove('playing');
+        video.classList.add('paused');
+      });
+      
+      // 添加结束状态
+      video.addEventListener('ended', () => {
+        video.classList.remove('playing');
+        video.classList.add('ended');
+      });
+    });
+  });
+</script>
+
+<style>
+  .video-container {
+    margin: 1.5rem 0;
+    position: relative;
+    background-color: var(--bg-secondary);
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  
+  .video-container video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .video-container:hover video {
+    transform: scale(1.01);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  .video-title {
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+  }
+  
+  .video-title h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  
+  /* 视频加载状态 */
+  .video-container video.loading {
+    opacity: 0.7;
+    position: relative;
+  }
+  
+  .video-container video.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* 视频错误状态 */
+  .video-container video.error {
+    opacity: 0.5;
+    filter: grayscale(100%);
+  }
+  
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .video-container {
+      margin: 1rem 0;
+    }
+    
+    .video-title {
+      padding: 0.5rem 0.75rem;
+    }
+    
+    .video-title h3 {
+      font-size: 0.875rem;
+    }
+  }
+</style>
